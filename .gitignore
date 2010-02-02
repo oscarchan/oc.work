@@ -1,3 +1,5 @@
 # ignore the following file and directory
 
 target
+*.log
+*~
