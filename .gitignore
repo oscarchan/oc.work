@@ -1,5 +1,6 @@
 # ignore the following file and directory
 
+.manager
 target
 *.log
 *~
