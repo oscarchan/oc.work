@@ -54,4 +54,47 @@ public class StringTest
 		}
 		
 	}
+	
+	@Test
+	public void testBuilder_vs_Buffer()
+	{
+	  int numItr = 1000;
+	  int sampleSize = 1000;
+	  testBuilderPerformance(numItr, sampleSize);
+	  testBufferPerformance(numItr, sampleSize);
+	}
+
+  private void testBufferPerformance(int numItr, int sampleSize)
+  {
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < numItr; i++) {
+      StringBuffer sb = new StringBuffer();
+      for (int k = 0; k < sampleSize; k++) {
+        sb.append(k);
+      }
+      
+      sb.toString();
+    }
+    
+    long total = System.currentTimeMillis() - start;
+    
+    mLog.info("buffer : " + numItr + ": sample=" + sampleSize + "total msec=" + total);
+  }
+
+  private void testBuilderPerformance(int numItr, int sampleSize)
+  {
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < numItr; i++) {
+      StringBuilder sb = new StringBuilder();
+      for (int k = 0; k < sampleSize; k++) {
+        sb.append(k);
+      }
+      
+      sb.toString();
+    }
+    
+    long total = System.currentTimeMillis() - start;
+    
+    mLog.info("builder: " + numItr + ": sample=" + sampleSize + "total msec=" + total);
+  }
 }
