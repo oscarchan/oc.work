@@ -1,22 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-  <classpathentry kind="src" path="src/test/java" output="target/test-classes" including="**/*.java"/>
-  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
-  <classpathentry kind="output" path="target/classes"/>
-  <classpathentry kind="var" path="M2_REPO/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar" sourcepath="M2_REPO/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar" sourcepath="M2_REPO/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-library/1.1/hamcrest-library-1.1.jar" sourcepath="M2_REPO/org/hamcrest/hamcrest-library/1.1/hamcrest-library-1.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/jmock/jmock/2.4.0/jmock-2.4.0.jar"/>
-  <classpathentry kind="var" path="M2_REPO/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar" sourcepath="M2_REPO/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/junit/junit/4.4/junit-4.4.jar" sourcepath="M2_REPO/junit/junit/4.4/junit-4.4-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/scala-lang/scala-compiler/2.7.7.RC2/scala-compiler-2.7.7.RC2.jar" sourcepath="M2_REPO/org/scala-lang/scala-compiler/2.7.7.RC2/scala-compiler-2.7.7.RC2-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/scala-lang/scala-library/2.7.7.RC2/scala-library-2.7.7.RC2.jar" sourcepath="M2_REPO/org/scala-lang/scala-library/2.7.7.RC2/scala-library-2.7.7.RC2-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/scalacheck/scalacheck/1.2/scalacheck-1.2.jar" sourcepath="M2_REPO/org/scalacheck/scalacheck/1.2/scalacheck-1.2-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/scalatest/scalatest/1.0/scalatest-1.0.jar" sourcepath="M2_REPO/org/scalatest/scalatest/1.0/scalatest-1.0-sources.jar">
-    <attributes>
-      <attribute value="jar:file:/Users/ochan/.m2/repository/org/scalatest/scalatest/1.0/scalatest-1.0-javadoc.jar!/" name="javadoc_location"/>
-    </attributes>
-  </classpathentry>
-  <classpathentry kind="var" path="M2_REPO/org/specs/specs/1.2.5/specs-1.2.5.jar" sourcepath="M2_REPO/org/specs/specs/1.2.5/specs-1.2.5-sources.jar"/>
-  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-  <classpathentry kind="con" path="ch.epfl.lamp.sdt.launching.SCALA_CONTAINER"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
+	<classpathentry kind="con" path="ch.epfl.lamp.sdt.launching.SCALA_CONTAINER"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
