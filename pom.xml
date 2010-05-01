@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>oc.work</groupId>
   <artifactId>oc.work</artifactId>
@@ -115,10 +116,10 @@
 
   <build>
     <!-- Source Config -->
-	<sourceDirectory>${project.basedir}/src/main</sourceDirectory>
+	<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
 	<resources>
 	  <resource>
-      	<directory>src</directory>
+      	<directory>src/main/resources</directory>
           <includes>
             <include>**/*.xml</include>
       	  </includes>
@@ -218,7 +219,26 @@
       	<version>1.0-SNAPSHOT</version>
       	<configuration></configuration>
       </plugin>
-    </plugins>
+      <plugin>
+      	<groupId>org.apache.activemq.tooling</groupId>
+      	<artifactId>maven-activemq-plugin</artifactId>
+      	<version>5.3.1</version>
+      	<configuration>
+          <configUri>xbean:file:conf/activemq.xml</configUri>
+          <fork>false</fork>
+          <systemProperties>
+            <property>
+              <name>javax.net.ssl.keyStorePassword</name>
+              <value>password</value>
+            </property>
+            <property>
+              <name>org.apache.activemq.default.directory.prefix</name>
+              <value>./target/</value>
+            </property>
+          </systemProperties>
+      	</configuration>
+      </plugin>
+	</plugins>
   </build>
   <reporting>
     <plugins>

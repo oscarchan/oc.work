@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+   
+    http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:amq="http://activemq.apache.org/schema/core"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+  http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.3.1.xsd" >
+
+    <!-- Allows us to use system properties as variables in this configuration file -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <value>classpath:conf/activemq.properties</value>
+        </property>
+        <property name="systemPropertiesModeName"  value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+    </bean>
+    <!-- 
+        The <broker> element is used to configure the ActiveMQ broker. 
+    -->
+    
+   	<bean id="mysql-ds" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl" value="jdbc:mysql://localhost/sar?zeroDateTimeBehavior=convertToNull" />
+		<property name="user" value="amq" />
+		<property name="password" value="amq" />
+<!--		<property name="idleConnectionTestPeriod" value="${db_idleConnectionTestPeriod}" />-->
+<!--		<property name="maxIdleTime" value="${db_maxIdleTime}" />-->
+<!--		<property name="maxConnectionAge" value="${db_maxConnectionAge}" />-->
+		<property name="minPoolSize" value="3" />
+		<property name="maxPoolSize" value="10" />
+		<property name="acquireIncrement" value="2" />
+		<property name="checkoutTimeout" value="1800" />
+		<property name="description" value="active mq" />
+	</bean>
+	
+	
+
+    <amq:broker xmlns="http://activemq.apache.org/schema/core" 
+	    brokerName="localhost" >
+	    
+        <destinationPolicy>
+            <policyMap >
+              <policyEntries> 
+                <policyEntry topic=">" producerFlowControl="true" memoryLimit="1mb" >
+                  <pendingSubscriberPolicy>
+                    <vmCursor />
+                  </pendingSubscriberPolicy>
+                </policyEntry>
+                <policyEntry queue=">" producerFlowControl="true" memoryLimit="1mb">
+                  <!-- Use VM cursor for better latency
+                       For more information, see:
+                       
+                       http://activemq.apache.org/message-cursors.html
+                       
+                  <pendingQueuePolicy>
+                    <vmQueueCursor/>
+                  </pendingQueuePolicy>
+                  -->
+                </policyEntry>
+              </policyEntries>
+            </policyMap>
+        </destinationPolicy> 
+ 
+        
+        <!-- 
+            The managementContext is used to configure how ActiveMQ is exposed in 
+            JMX. By default, ActiveMQ uses the MBean server that is started by 
+            the JVM. For more information, see: 
+            
+            http://activemq.apache.org/jmx.html 
+        -->
+        <managementContext>
+            <managementContext createConnector="false"/>
+        </managementContext>
+        <!-- 
+            Configure message persistence for the broker. The default persistence
+            mechanism is the KahaDB store (identified by the kahaDB tag). 
+            For more information, see: 
+            
+            http://activemq.apache.org/persistence.html 
+        -->
+        <persistenceAdapter>
+        	<jdbcPersistenceAdapter dataDirectory="#mysql-ds"/>
+        </persistenceAdapter>
+        
+        
+          <!--
+            The systemUsage controls the maximum amount of space the broker will 
+            use before slowing down producers. For more information, see:
+            
+            http://activemq.apache.org/producer-flow-control.html
+             
+        <systemUsage>
+            <systemUsage>
+                <memoryUsage>
+                    <memoryUsage limit="20 mb"/>
+                </memoryUsage>
+                <storeUsage>
+                    <storeUsage limit="1 gb" name="foo"/>
+                </storeUsage>
+                <tempUsage>
+                    <tempUsage limit="100 mb"/>
+                </tempUsage>
+            </systemUsage>
+        </systemUsage>
+		-->
+		  
+        <!-- 
+            The transport connectors expose ActiveMQ over a given protocol to
+            clients and other brokers. For more information, see: 
+            
+            http://activemq.apache.org/configuring-transports.html 
+        -->
+        <transportConnectors>
+            <transportConnector name="openwire" uri="tcp://0.0.0.0:${activemq.port}"
+              discoveryUri="multicast://default" 
+            />
+        </transportConnectors>
+    </amq:broker>
+    <!-- 
+        Uncomment to enable Camel
+        Take a look at activemq-camel.xml for more details
+         
+    <import resource="camel.xml"/>
+    -->
+    <!-- 
+        Enable web consoles, REST and Ajax APIs and demos
+        Take a look at activemq-jetty.xml for more details 
+    -->
+    <import resource="jetty.xml"/>
+    
+</beans>
