@@ -5,7 +5,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <artifactId>oc.work</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>oc.work</name>
-  <packaging>war</packaging>
+  <packaging>jar</packaging>
   <inceptionYear>2008</inceptionYear>
   <properties>
     <scala.version>2.7.7.RC2</scala.version>
@@ -224,7 +224,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       	<artifactId>maven-activemq-plugin</artifactId>
       	<version>5.3.1</version>
       	<configuration>
-          <configUri>xbean:file:conf/activemq.xml</configUri>
+          <configUri>xbean:conf/activemq.xml</configUri>
           <fork>false</fork>
           <systemProperties>
             <property>
