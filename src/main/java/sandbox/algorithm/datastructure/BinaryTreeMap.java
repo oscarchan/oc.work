@@ -16,14 +16,12 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Binary tree implementation that is derived from TreeMap
  */
 
-public class BinaryTreeMap<K,V>
+public abstract class BinaryTreeMap<K,V>
     extends AbstractMap<K,V>
     implements NavigableMap<K,V>, Cloneable, java.io.Serializable
 {
@@ -534,38 +532,6 @@ public class BinaryTreeMap<K,V>
         root = null;
     }
 
-    /**
-     * Returns a shallow copy of this <tt>TreeMap</tt> instance. (The keys and
-     * values themselves are not cloned.)
-     *
-     * @return a shallow copy of this map
-     */
-    public Object clone() {
-        TreeMap<K,V> clone = null;
-        try {
-            clone = (TreeMap<K,V>) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError();
-        }
-
-        // Put clone into "virgin" state (except for comparator)
-        clone.root = null;
-        clone.size = 0;
-        clone.modCount = 0;
-        clone.entrySet = null;
-        clone.navigableKeySet = null;
-        clone.descendingMap = null;
-
-        // Initialize clone with our mappings
-        try {
-            clone.buildFromSorted(size, entrySet().iterator(), null, null);
-        } catch (java.io.IOException cannotHappen) {
-        } catch (ClassNotFoundException cannotHappen) {
-        }
-
-        return clone;
-    }
-
     // NavigableMap API methods
 
     /**
@@ -752,8 +718,7 @@ public class BinaryTreeMap<K,V>
      * support the <tt>add</tt> or <tt>addAll</tt> operations.
      */
     public Collection<V> values() {
-        Collection<V> vs = values;
-        return (vs != null) ? vs : (values = new Values());
+        return new Values();
     }
 
     /**
@@ -776,59 +741,13 @@ public class BinaryTreeMap<K,V>
         return (es != null) ? es : (entrySet = new EntrySet());
     }
 
-    /**
-     * @since 1.6
-     */
-    public NavigableMap<K, V> descendingMap() {
-        NavigableMap<K, V> km = descendingMap;
-        return (km != null) ? km :
-            (descendingMap = new DescendingSubMap(this,
-                                                  true, null, true,
-                                                  true, null, true));
-    }
+    
 
-    /**
-     * @throws ClassCastException       {@inheritDoc}
-     * @throws NullPointerException if <tt>fromKey</tt> or <tt>toKey</tt> is
-     *         null and this map uses natural ordering, or its comparator
-     *         does not permit null keys
-     * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
-     */
-    public NavigableMap<K,V> subMap(K fromKey, boolean fromInclusive,
-                                    K toKey,   boolean toInclusive) {
-        return new AscendingSubMap(this,
-                                   false, fromKey, fromInclusive,
-                                   false, toKey,   toInclusive);
-    }
+    
 
-    /**
-     * @throws ClassCastException       {@inheritDoc}
-     * @throws NullPointerException if <tt>toKey</tt> is null
-     *         and this map uses natural ordering, or its comparator
-     *         does not permit null keys
-     * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
-     */
-    public NavigableMap<K,V> headMap(K toKey, boolean inclusive) {
-        return new AscendingSubMap(this,
-                                   true,  null,  true,
-                                   false, toKey, inclusive);
-    }
+    
 
-    /**
-     * @throws ClassCastException       {@inheritDoc}
-     * @throws NullPointerException if <tt>fromKey</tt> is null
-     *         and this map uses natural ordering, or its comparator
-     *         does not permit null keys
-     * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
-     */
-    public NavigableMap<K,V> tailMap(K fromKey, boolean inclusive) {
-        return new AscendingSubMap(this,
-                                   false, fromKey, inclusive,
-                                   true,  null,    true);
-    }
+    
 
     /**
      * @throws ClassCastException       {@inheritDoc}
@@ -871,11 +790,11 @@ public class BinaryTreeMap<K,V>
         }
 
         public int size() {
-            return TreeMap.this.size();
+            return BinaryTreeMap.this.size();
         }
 
         public boolean contains(Object o) {
-            return TreeMap.this.containsValue(o);
+            return BinaryTreeMap.this.containsValue(o);
         }
 
         public boolean remove(Object o) {
@@ -889,7 +808,7 @@ public class BinaryTreeMap<K,V>
         }
 
         public void clear() {
-            TreeMap.this.clear();
+            BinaryTreeMap.this.clear();
         }
     }
 
@@ -921,11 +840,11 @@ public class BinaryTreeMap<K,V>
         }
 
         public int size() {
-            return TreeMap.this.size();
+            return BinaryTreeMap.this.size();
         }
 
         public void clear() {
-            TreeMap.this.clear();
+            BinaryTreeMap.this.clear();
         }
     }
 
@@ -950,17 +869,17 @@ public class BinaryTreeMap<K,V>
         KeySet(NavigableMap<E,Object> map) { m = map; }
 
         public Iterator<E> iterator() {
-            if (m instanceof TreeMap)
-                return ((TreeMap<E,Object>)m).keyIterator();
+            if (m instanceof BinaryTreeMap)
+                return ((BinaryTreeMap<E,Object>)m).keyIterator();
             else
-                return (Iterator<E>)(((TreeMap.NavigableSubMap)m).keyIterator());
+                return (Iterator<E>)(((BinaryTreeMap.NavigableSubMap)m).keyIterator());
         }
 
         public Iterator<E> descendingIterator() {
-            if (m instanceof TreeMap)
-                return ((TreeMap<E,Object>)m).descendingKeyIterator();
+            if (m instanceof BinaryTreeMap)
+                return ((BinaryTreeMap<E,Object>)m).descendingKeyIterator();
             else
-                return (Iterator<E>)(((TreeMap.NavigableSubMap)m).descendingKeyIterator());
+                return (Iterator<E>)(((BinaryTreeMap.NavigableSubMap)m).descendingKeyIterator());
         }
 
         public int size() { return m.size(); }
@@ -987,17 +906,9 @@ public class BinaryTreeMap<K,V>
             m.remove(o);
             return size() != oldSize;
         }
-        public NavigableSet<E> subSet(E fromElement, boolean fromInclusive,
-                                      E toElement,   boolean toInclusive) {
-            return new TreeSet<E>(m.subMap(fromElement, fromInclusive,
-                                           toElement,   toInclusive));
-        }
-        public NavigableSet<E> headSet(E toElement, boolean inclusive) {
-            return new TreeSet<E>(m.headMap(toElement, inclusive));
-        }
-        public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-            return new TreeSet<E>(m.tailMap(fromElement, inclusive));
-        }
+        
+        
+        
         public SortedSet<E> subSet(E fromElement, E toElement) {
             return subSet(fromElement, true, toElement, false);
         }
@@ -1007,9 +918,28 @@ public class BinaryTreeMap<K,V>
         public SortedSet<E> tailSet(E fromElement) {
             return tailSet(fromElement, true);
         }
-        public NavigableSet<E> descendingSet() {
-            return new TreeSet(m.descendingMap());
-        }
+
+		public NavigableSet<E> descendingSet() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public NavigableSet<E> headSet(E toElement, boolean inclusive) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public NavigableSet<E> subSet(E fromElement, boolean fromInclusive,
+				E toElement, boolean toInclusive) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+        
     }
 
     /**
@@ -1123,7 +1053,7 @@ public class BinaryTreeMap<K,V>
     /**
      * Return SimpleImmutableEntry for entry, or null if null
      */
-    static <K,V> Map.Entry<K,V> exportEntry(TreeMap.Entry<K,V> e) {
+    static <K,V> Map.Entry<K,V> exportEntry(BinaryTreeMap.Entry<K,V> e) {
         return e == null? null :
             new AbstractMap.SimpleImmutableEntry<K,V>(e);
     }
@@ -1131,7 +1061,7 @@ public class BinaryTreeMap<K,V>
     /**
      * Return key for entry, or null if null
      */
-    static <K,V> K keyOrNull(TreeMap.Entry<K,V> e) {
+    static <K,V> K keyOrNull(BinaryTreeMap.Entry<K,V> e) {
         return e == null? null : e.key;
     }
 
@@ -1156,7 +1086,7 @@ public class BinaryTreeMap<K,V>
         /**
          * The backing map.
          */
-        final TreeMap<K,V> m;
+        final BinaryTreeMap<K,V> m;
 
         /**
          * Endpoints are represented as triples (fromStart, lo,
@@ -1170,7 +1100,7 @@ public class BinaryTreeMap<K,V>
         final boolean fromStart, toEnd;
         final boolean loInclusive, hiInclusive;
 
-        NavigableSubMap(TreeMap<K,V> m,
+        NavigableSubMap(BinaryTreeMap<K,V> m,
                         boolean fromStart, K lo, boolean loInclusive,
                         boolean toEnd,     K hi, boolean hiInclusive) {
             if (!fromStart && !toEnd) {
@@ -1231,59 +1161,59 @@ public class BinaryTreeMap<K,V>
          * versions that invert senses for descending maps
          */
 
-        final TreeMap.Entry<K,V> absLowest() {
-	    TreeMap.Entry<K,V> e =
+        final BinaryTreeMap.Entry<K,V> absLowest() {
+	    BinaryTreeMap.Entry<K,V> e =
                 (fromStart ?  m.getFirstEntry() :
                  (loInclusive ? m.getCeilingEntry(lo) :
                                 m.getHigherEntry(lo)));
             return (e == null || tooHigh(e.key)) ? null : e;
         }
 
-        final TreeMap.Entry<K,V> absHighest() {
-	    TreeMap.Entry<K,V> e =
+        final BinaryTreeMap.Entry<K,V> absHighest() {
+	    BinaryTreeMap.Entry<K,V> e =
                 (toEnd ?  m.getLastEntry() :
                  (hiInclusive ?  m.getFloorEntry(hi) :
                                  m.getLowerEntry(hi)));
             return (e == null || tooLow(e.key)) ? null : e;
         }
 
-        final TreeMap.Entry<K,V> absCeiling(K key) {
+        final BinaryTreeMap.Entry<K,V> absCeiling(K key) {
             if (tooLow(key))
                 return absLowest();
-	    TreeMap.Entry<K,V> e = m.getCeilingEntry(key);
+	    BinaryTreeMap.Entry<K,V> e = m.getCeilingEntry(key);
             return (e == null || tooHigh(e.key)) ? null : e;
         }
 
-        final TreeMap.Entry<K,V> absHigher(K key) {
+        final BinaryTreeMap.Entry<K,V> absHigher(K key) {
             if (tooLow(key))
                 return absLowest();
-	    TreeMap.Entry<K,V> e = m.getHigherEntry(key);
+	    BinaryTreeMap.Entry<K,V> e = m.getHigherEntry(key);
             return (e == null || tooHigh(e.key)) ? null : e;
         }
 
-        final TreeMap.Entry<K,V> absFloor(K key) {
+        final BinaryTreeMap.Entry<K,V> absFloor(K key) {
             if (tooHigh(key))
                 return absHighest();
-	    TreeMap.Entry<K,V> e = m.getFloorEntry(key);
+	    BinaryTreeMap.Entry<K,V> e = m.getFloorEntry(key);
             return (e == null || tooLow(e.key)) ? null : e;
         }
 
-        final TreeMap.Entry<K,V> absLower(K key) {
+        final BinaryTreeMap.Entry<K,V> absLower(K key) {
             if (tooHigh(key))
                 return absHighest();
-	    TreeMap.Entry<K,V> e = m.getLowerEntry(key);
+	    BinaryTreeMap.Entry<K,V> e = m.getLowerEntry(key);
             return (e == null || tooLow(e.key)) ? null : e;
         }
 
         /** Returns the absolute high fence for ascending traversal */
-        final TreeMap.Entry<K,V> absHighFence() {
+        final BinaryTreeMap.Entry<K,V> absHighFence() {
             return (toEnd ? null : (hiInclusive ?
                                     m.getHigherEntry(hi) :
                                     m.getCeilingEntry(hi)));
         }
 
         /** Return the absolute low fence for descending traversal  */
-        final TreeMap.Entry<K,V> absLowFence() {
+        final BinaryTreeMap.Entry<K,V> absLowFence() {
             return (fromStart ? null : (loInclusive ?
                                         m.getLowerEntry(lo) :
                                         m.getFloorEntry(lo)));
@@ -1292,12 +1222,12 @@ public class BinaryTreeMap<K,V>
         // Abstract methods defined in ascending vs descending classes
         // These relay to the appropriate absolute versions
 
-        abstract TreeMap.Entry<K,V> subLowest();
-        abstract TreeMap.Entry<K,V> subHighest();
-        abstract TreeMap.Entry<K,V> subCeiling(K key);
-        abstract TreeMap.Entry<K,V> subHigher(K key);
-        abstract TreeMap.Entry<K,V> subFloor(K key);
-        abstract TreeMap.Entry<K,V> subLower(K key);
+        abstract BinaryTreeMap.Entry<K,V> subLowest();
+        abstract BinaryTreeMap.Entry<K,V> subHighest();
+        abstract BinaryTreeMap.Entry<K,V> subCeiling(K key);
+        abstract BinaryTreeMap.Entry<K,V> subHigher(K key);
+        abstract BinaryTreeMap.Entry<K,V> subFloor(K key);
+        abstract BinaryTreeMap.Entry<K,V> subLower(K key);
 
         /** Returns ascending iterator from the perspective of this submap */
         abstract Iterator<K> keyIterator();
@@ -1382,7 +1312,7 @@ public class BinaryTreeMap<K,V>
         }
 
         public final Map.Entry<K,V> pollFirstEntry() {
-	    TreeMap.Entry<K,V> e = subLowest();
+	    BinaryTreeMap.Entry<K,V> e = subLowest();
             Map.Entry<K,V> result = exportEntry(e);
             if (e != null)
                 m.deleteEntry(e);
@@ -1390,7 +1320,7 @@ public class BinaryTreeMap<K,V>
         }
 
         public final Map.Entry<K,V> pollLastEntry() {
-	    TreeMap.Entry<K,V> e = subHighest();
+	    BinaryTreeMap.Entry<K,V> e = subHighest();
             Map.Entry<K,V> result = exportEntry(e);
             if (e != null)
                 m.deleteEntry(e);
@@ -1405,7 +1335,7 @@ public class BinaryTreeMap<K,V>
         public final NavigableSet<K> navigableKeySet() {
             KeySet<K> nksv = navigableKeySetView;
             return (nksv != null) ? nksv :
-                (navigableKeySetView = new TreeMap.KeySet(this));
+                (navigableKeySetView = new BinaryTreeMap.KeySet(this));
         }
 
         public final Set<K> keySet() {
@@ -1449,7 +1379,7 @@ public class BinaryTreeMap<K,V>
             }
 
             public boolean isEmpty() {
-                TreeMap.Entry<K,V> n = absLowest();
+                BinaryTreeMap.Entry<K,V> n = absLowest();
                 return n == null || tooHigh(n.key);
             }
 
@@ -1460,7 +1390,7 @@ public class BinaryTreeMap<K,V>
                 K key = entry.getKey();
                 if (!inRange(key))
                     return false;
-                TreeMap.Entry node = m.getEntry(key);
+                BinaryTreeMap.Entry node = m.getEntry(key);
                 return node != null &&
                     valEquals(node.getValue(), entry.getValue());
             }
@@ -1472,7 +1402,7 @@ public class BinaryTreeMap<K,V>
                 K key = entry.getKey();
                 if (!inRange(key))
                     return false;
-                TreeMap.Entry<K,V> node = m.getEntry(key);
+                BinaryTreeMap.Entry<K,V> node = m.getEntry(key);
                 if (node!=null && valEquals(node.getValue(),entry.getValue())){
                     m.deleteEntry(node);
                     return true;
@@ -1485,13 +1415,13 @@ public class BinaryTreeMap<K,V>
          * Iterators for SubMaps
          */
         abstract class SubMapIterator<T> implements Iterator<T> {
-            TreeMap.Entry<K,V> lastReturned;
-            TreeMap.Entry<K,V> next;
+            BinaryTreeMap.Entry<K,V> lastReturned;
+            BinaryTreeMap.Entry<K,V> next;
             final K fenceKey;
             int expectedModCount;
 
-            SubMapIterator(TreeMap.Entry<K,V> first,
-                           TreeMap.Entry<K,V> fence) {
+            SubMapIterator(BinaryTreeMap.Entry<K,V> first,
+                           BinaryTreeMap.Entry<K,V> fence) {
                 expectedModCount = m.modCount;
                 lastReturned = null;
                 next = first;
@@ -1502,8 +1432,8 @@ public class BinaryTreeMap<K,V>
                 return next != null && next.key != fenceKey;
             }
 
-            final TreeMap.Entry<K,V> nextEntry() {
-                TreeMap.Entry<K,V> e = next;
+            final BinaryTreeMap.Entry<K,V> nextEntry() {
+                BinaryTreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)
                     throw new NoSuchElementException();
                 if (m.modCount != expectedModCount)
@@ -1513,8 +1443,8 @@ public class BinaryTreeMap<K,V>
                 return e;
             }
 
-            final TreeMap.Entry<K,V> prevEntry() {
-                TreeMap.Entry<K,V> e = next;
+            final BinaryTreeMap.Entry<K,V> prevEntry() {
+                BinaryTreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)
                     throw new NoSuchElementException();
                 if (m.modCount != expectedModCount)
@@ -1550,8 +1480,8 @@ public class BinaryTreeMap<K,V>
         }
 
         final class SubMapEntryIterator extends SubMapIterator<Map.Entry<K,V>> {
-            SubMapEntryIterator(TreeMap.Entry<K,V> first,
-                                TreeMap.Entry<K,V> fence) {
+            SubMapEntryIterator(BinaryTreeMap.Entry<K,V> first,
+                                BinaryTreeMap.Entry<K,V> fence) {
                 super(first, fence);
             }
             public Map.Entry<K,V> next() {
@@ -1563,8 +1493,8 @@ public class BinaryTreeMap<K,V>
         }
 
         final class SubMapKeyIterator extends SubMapIterator<K> {
-            SubMapKeyIterator(TreeMap.Entry<K,V> first,
-                              TreeMap.Entry<K,V> fence) {
+            SubMapKeyIterator(BinaryTreeMap.Entry<K,V> first,
+                              BinaryTreeMap.Entry<K,V> fence) {
                 super(first, fence);
             }
             public K next() {
@@ -1576,8 +1506,8 @@ public class BinaryTreeMap<K,V>
         }
 
         final class DescendingSubMapEntryIterator extends SubMapIterator<Map.Entry<K,V>> {
-            DescendingSubMapEntryIterator(TreeMap.Entry<K,V> last,
-                                          TreeMap.Entry<K,V> fence) {
+            DescendingSubMapEntryIterator(BinaryTreeMap.Entry<K,V> last,
+                                          BinaryTreeMap.Entry<K,V> fence) {
                 super(last, fence);
             }
 
@@ -1590,8 +1520,8 @@ public class BinaryTreeMap<K,V>
         }
 
         final class DescendingSubMapKeyIterator extends SubMapIterator<K> {
-            DescendingSubMapKeyIterator(TreeMap.Entry<K,V> last,
-                                        TreeMap.Entry<K,V> fence) {
+            DescendingSubMapKeyIterator(BinaryTreeMap.Entry<K,V> last,
+                                        BinaryTreeMap.Entry<K,V> fence) {
                 super(last, fence);
             }
             public K next() {
@@ -1609,7 +1539,7 @@ public class BinaryTreeMap<K,V>
     static final class AscendingSubMap<K,V> extends NavigableSubMap<K,V> {
         private static final long serialVersionUID = 912986545866124060L;
 
-        AscendingSubMap(TreeMap<K,V> m,
+        AscendingSubMap(BinaryTreeMap<K,V> m,
                         boolean fromStart, K lo, boolean loInclusive,
                         boolean toEnd,     K hi, boolean hiInclusive) {
             super(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive);
@@ -1674,12 +1604,12 @@ public class BinaryTreeMap<K,V>
             return (es != null) ? es : new AscendingEntrySetView();
         }
 
-        TreeMap.Entry<K,V> subLowest()       { return absLowest(); }
-        TreeMap.Entry<K,V> subHighest()      { return absHighest(); }
-        TreeMap.Entry<K,V> subCeiling(K key) { return absCeiling(key); }
-        TreeMap.Entry<K,V> subHigher(K key)  { return absHigher(key); }
-        TreeMap.Entry<K,V> subFloor(K key)   { return absFloor(key); }
-        TreeMap.Entry<K,V> subLower(K key)   { return absLower(key); }
+        BinaryTreeMap.Entry<K,V> subLowest()       { return absLowest(); }
+        BinaryTreeMap.Entry<K,V> subHighest()      { return absHighest(); }
+        BinaryTreeMap.Entry<K,V> subCeiling(K key) { return absCeiling(key); }
+        BinaryTreeMap.Entry<K,V> subHigher(K key)  { return absHigher(key); }
+        BinaryTreeMap.Entry<K,V> subFloor(K key)   { return absFloor(key); }
+        BinaryTreeMap.Entry<K,V> subLower(K key)   { return absLower(key); }
     }
 
     /**
@@ -1687,7 +1617,7 @@ public class BinaryTreeMap<K,V>
      */
     static final class DescendingSubMap<K,V>  extends NavigableSubMap<K,V> {
         private static final long serialVersionUID = 912986545866120460L;
-        DescendingSubMap(TreeMap<K,V> m,
+        DescendingSubMap(BinaryTreeMap<K,V> m,
                         boolean fromStart, K lo, boolean loInclusive,
                         boolean toEnd,     K hi, boolean hiInclusive) {
             super(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive);
@@ -1755,12 +1685,12 @@ public class BinaryTreeMap<K,V>
             return (es != null) ? es : new DescendingEntrySetView();
         }
 
-        TreeMap.Entry<K,V> subLowest()       { return absHighest(); }
-        TreeMap.Entry<K,V> subHighest()      { return absLowest(); }
-        TreeMap.Entry<K,V> subCeiling(K key) { return absFloor(key); }
-        TreeMap.Entry<K,V> subHigher(K key)  { return absLower(key); }
-        TreeMap.Entry<K,V> subFloor(K key)   { return absCeiling(key); }
-        TreeMap.Entry<K,V> subLower(K key)   { return absHigher(key); }
+        BinaryTreeMap.Entry<K,V> subLowest()       { return absHighest(); }
+        BinaryTreeMap.Entry<K,V> subHighest()      { return absLowest(); }
+        BinaryTreeMap.Entry<K,V> subCeiling(K key) { return absFloor(key); }
+        BinaryTreeMap.Entry<K,V> subHigher(K key)  { return absLower(key); }
+        BinaryTreeMap.Entry<K,V> subFloor(K key)   { return absCeiling(key); }
+        BinaryTreeMap.Entry<K,V> subLower(K key)   { return absHigher(key); }
     }
 
     /**
@@ -1778,7 +1708,7 @@ public class BinaryTreeMap<K,V>
         private boolean fromStart = false, toEnd = false;
         private K fromKey, toKey;
         private Object readResolve() {
-            return new AscendingSubMap(TreeMap.this,
+            return new AscendingSubMap(BinaryTreeMap.this,
                                        fromStart, fromKey, true,
                                        toEnd, toKey, false);
         }
@@ -1897,7 +1827,7 @@ public class BinaryTreeMap<K,V>
     /**
      * Returns the successor of the specified Entry, or null if no such.
      */
-    static <K,V> TreeMap.Entry<K,V> successor(Entry<K,V> t) {
+    static <K,V> BinaryTreeMap.Entry<K,V> successor(Entry<K,V> t) {
         if (t == null)
             return null;
         else if (t.right != null) {

@@ -5,7 +5,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <artifactId>oc.work</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>oc.work</name>
-  <packaging>jar</packaging>
   <inceptionYear>2008</inceptionYear>
   <properties>
     <scala.version>2.7.7.RC2</scala.version>
@@ -111,6 +110,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     	<groupId>org.apache.cxf</groupId>
     	<artifactId>cxf-rt-transports-http</artifactId>
     	<version>2.2.7</version>
+    </dependency>
+    <dependency>
+    	<groupId>c3p0</groupId>
+    	<artifactId>c3p0</artifactId>
+    	<version>0.9.1.2</version>
     </dependency>
   </dependencies>
 
@@ -224,19 +228,29 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       	<artifactId>maven-activemq-plugin</artifactId>
       	<version>5.3.1</version>
       	<configuration>
-          <configUri>xbean:conf/activemq.xml</configUri>
+          <configUri>xbean:file:./conf/activemq.xml</configUri>
           <fork>false</fork>
-          <systemProperties>
-            <property>
-              <name>javax.net.ssl.keyStorePassword</name>
-              <value>password</value>
-            </property>
-            <property>
-              <name>org.apache.activemq.default.directory.prefix</name>
-              <value>./target/</value>
-            </property>
-          </systemProperties>
       	</configuration>
+      </plugin>
+      <plugin>
+      	<artifactId>maven-source-plugin</artifactId>
+      	<version>2.1.1</version>
+      	<executions>
+      	  <execution>
+      	    <id>attach-sources</id>
+      	    <goals>
+      	      <goal>jar</goal>
+      	    </goals>
+      	  </execution>
+      	</executions>
+      	<configuration>
+      	  <attach>true</attach>
+      	</configuration>
+      </plugin>
+      <plugin>
+      	<groupId>org.codehaus.mojo</groupId>
+      	<artifactId>xmlbeans-maven-plugin</artifactId>
+      	<version>2.0</version>
       </plugin>
 	</plugins>
   </build>
