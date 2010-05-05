@@ -1,99 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+    xmlns:cxf="http://cxf.apache.org/core"
 	xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
-http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd"
+http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd"
 	default-lazy-init="false">
 
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
-	<import resource="classpath:META-INF/cxf/cxf-extension-xml.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
-	<bean id="authorizationAspect" class="com.zynga.platform.web.AuthorizationAspect" />
-	<bean id="paymentExceptionMapper" class="com.zynga.platform.web.PaymentExceptionMapper" />
-	<bean id="jsonProvider" class="com.zynga.platform.util.ZJSONProvider">
+<!--	<import resource="classpath:META-INF/cxf/cxf-extension-xml.xml" />-->
+
+<!--	<bean id="paymentExceptionMapper" class="com.zynga.platform.web.PaymentExceptionMapper" />-->
+	<bean id="jsonProvider" class="ws.rs.provider.XStreamJsonProvider">
 		<property name="unmarshallAsJaxbElement" value="true" />
 	</bean>
+	
 	<jaxrs:server id="jsonRestEndpoint" address="/">
 		<jaxrs:serviceBeans>
-			<ref bean="abTestWebService" />
-			<ref bean="authorizationWebService" />
-			<ref bean="accountWebService" />
-			<ref bean="callbackWebService" />
-			<ref bean="imageWebService" />
-			<ref bean="offerWebService" />
-			<ref bean="paymentSourceWebService" />
-			<ref bean="productWebService" />
-			<ref bean="purchaseWebService" />
-			<ref bean="userWebService" />
-			<ref bean="ztrackWebService" />
-			<ref bean="healthCheckService" />
-			<ref bean="goodsWebService" />
-			<ref bean="promotionWebService" />
-			<ref bean="incentiveWebService" />
+			<ref bean="sampleService" />
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
 			<ref bean="jsonProvider" />
-			<ref bean="paymentExceptionMapper" />
+<!--			<ref bean="paymentExceptionMapper" />-->
 		</jaxrs:providers>
 	</jaxrs:server>
-    <bean id="healthCheckService" class="com.zynga.pay.common.service.HealthCheckService" init-method="init">
-        <property name="path" value="${healthCheck.path}" />
-    </bean>
-    
-	<bean id="abTestWebService" class="com.zynga.platform.web.ABTestWebService">
-		<property name="abTestManager" ref="ABTestManager" />
+
+
+	<bean id="sampleService" class="ws.rs.RestSampleService">
 	</bean>
-	<bean id="authorizationWebService" class="com.zynga.platform.web.AuthorizationWebService">
-		<property name="authorizationManager" ref="AuthorizationManager" />
-	</bean>
-	<bean id="accountWebService" class="com.zynga.platform.web.AccountWebService">
-		<property name="accountManager" ref="AccountManager" />
-	</bean>
-	<bean id="callbackWebService" class="com.zynga.platform.web.CallbackWebService">
-		<property name="callbackManager" ref="CallbackManager" />
-	</bean>
-	<bean id="imageWebService" class="com.zynga.platform.web.ImageWebService">
-		<property name="imageManager" ref="ImageManager" />
-	</bean>
+
+	<!-- 
+     logging 
+     -->
+	<cxf:bus>
+		<cxf:inInterceptors>
+			<ref bean="logInbound" />
+		</cxf:inInterceptors>
+		<cxf:outInterceptors>
+			<ref bean="logOutbound" />
+		</cxf:outInterceptors>
+		<cxf:inFaultInterceptors>
+			<ref bean="logOutbound" />
+		</cxf:inFaultInterceptors>
+	</cxf:bus>
 	
-	<bean id="goodsWebService" class="com.zynga.platform.web.GoodsWebService">
-		<property name="goodsManager" ref="GoodsManager" />
-	</bean>
-	
-	<bean id="offerWebService" class="com.zynga.platform.web.OfferWebService">
-		<property name="offerManager" ref="OfferManager" />
-	</bean>
-	
-	<bean id="paymentSourceWebService" class="com.zynga.platform.web.PaymentSourceWebService">
-		<property name="paymentSourceManager" ref="PaymentSourceManager" />
-	</bean>
-	
-	<bean id="productWebService" class="com.zynga.platform.web.ProductWebService">
-		<property name="productManager" ref="ProductManager" />
-	</bean>
-	
-	<bean id="purchaseWebService" class="com.zynga.platform.web.PurchaseWebService">
-		<property name="purchaseManager" ref="PurchaseManager" />
-	</bean>
-	
-	<bean id="userWebService" class="com.zynga.platform.web.UserWebService">
-		<property name="userManager" ref="UserManager" />
-	</bean>
-	
-	<bean id="ztrackWebService" class="com.zynga.platform.web.ZTrackWebService" />
-	
-	<bean id="promotionWebService" class="com.zynga.platform.web.PromotionWebService">
-		<property name="promotionManager" ref="PromotionManager" />
-	</bean>
-	
-	<bean id="incentiveWebService" class="com.zynga.platform.web.IncentiveWebService">
-		<property name="incentiveManager" ref="incentiveManager" />
-	</bean>
+   <bean id="logInbound" class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+   <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+
+
 </beans>
