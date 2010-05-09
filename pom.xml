@@ -126,25 +126,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   </dependencies>
 
   <build>
-    <!-- Source Config -->
-	<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
-	<resources>
-	  <resource>
-      	<directory>src/main/resources</directory>
-          <includes>
-            <include>**/*.xml</include>
-      	  </includes>
-      	  <filtering>false</filtering>
-      </resource>
-	</resources>
-	
-	<!-- Test Config -->
-    <testSourceDirectory>${project.basedir}/test/src</testSourceDirectory>
-    <testResources>
-      <testResource>
-        <directory>${project.basedir}/test/resources</directory>
-      </testResource>        
-    </testResources>
 	<plugins>
     <!--
       <plugin>
@@ -230,7 +211,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       	<version>1.0-SNAPSHOT</version>
       	<configuration>
 <!--			<path>/platformservice</path>-->
-<!--			<port>8120</port>-->
+			<port>8000</port>
           <systemProperties>
 <!--            <com.sun.management.jmxremote.port>7777</com.sun.management.jmxremote.port>-->
 <!--		    <com.sun.management.jmxremote.ssl>false</com.sun.management.jmxremote.ssl>-->

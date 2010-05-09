@@ -2,7 +2,8 @@ package json.simple;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Test;
 
 public class TestJSONObject
@@ -13,7 +14,7 @@ public class TestJSONObject
   
   @SuppressWarnings("unchecked")
   @Test
-  public void testObjectTypes()
+  public void testObjectTypes() throws JSONException
   {   
     JSONObject obj=new JSONObject();
     obj.put("name","foo");
@@ -21,7 +22,7 @@ public class TestJSONObject
     obj.put("balance",new Double(1000.21));
     obj.put("sum_as_string", "100");
     obj.put("is_vip",new Boolean(true));
-    obj.put("nickname",null);
+    obj.put("nickname",(String) null);
   
     mLog.info("result: " + obj);
     

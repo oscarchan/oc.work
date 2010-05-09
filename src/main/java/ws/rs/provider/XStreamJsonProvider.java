@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 
 @Provider
-@Produces("text/json")
+@Produces("application/json")
 public class XStreamJsonProvider extends JSONProvider 
 {
 	private static Class<? extends HierarchicalStreamDriver> driverClass = JsonHierarchicalStreamDriver.class;
@@ -37,7 +37,10 @@ public class XStreamJsonProvider extends JSONProvider
 			MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException 
 	{
-		throw new UnsupportedOperationException();
+        XStream x = new XStream(newJsonDriver());
+        
+        
+        return null;
 	}
 	
     public void writeTo(Object t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
