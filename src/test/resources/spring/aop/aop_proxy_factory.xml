@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+  xmlns="http://www.springframework.org/schema/beans"   
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"   
+  xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd 
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+  <!--  test CGLib proxy -->
+  <bean id="sampleBean_pointCut_before"
+    class="org.springframework.aop.framework.ProxyFactoryBean">
+    
+    <property name="target">
+      <bean class="spring.beans.BeanObjects$SampleBean" />
+    </property>
+    <property name="interceptorNames" value="methodLogger" />
+    <property name="autodetectInterfaces" value="false" /> <!-- force CGLib proxy to avoid CassCastException -->
+  </bean>
+  
+  <!-- using RegEx/AspectJ aop via ProxyFactoryBean -->
+  <bean id="getterLogAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+    <property name="advice">
+      <bean class="spring.aop.AopAdvices$TimingLogAdvice" />
+    </property>
+    <property name="pattern" value=".*get.*" />
+  </bean>
+  
+  <bean id="setterLogAdvisor" class="org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+    <property name="advice">
+      <bean class="spring.aop.AopAdvices$TimingLogAdvice" />
+    </property>
+    <property name="expression" value="execution(* spring.beans.BeanObjects$SampleBean+.set*(..) )" />
+  </bean>
+
+  <bean id="sampleBean_pointCut_around"
+    class="org.springframework.aop.framework.ProxyFactoryBean">
+    
+    <property name="target">
+      <bean class="spring.beans.BeanObjects$SampleBean" />
+    </property>
+    <property name="interceptorNames" value="getterLogAdvisor,setterLogAdvisor" />
+
+    <property name="autodetectInterfaces" value="false" /> <!-- force CGLib proxy to avoid CassCastException -->
+  </bean>
+
+  <bean id="sampleBean_pointCut_afterReturning" 
+    class="spring.beans.BeanObjects$SampleBean" />
+    
+  <bean id="sampleBean_pointCut_afterThrowing" 
+    class="spring.beans.BeanObjects$SampleBean" />
+    
+    
+  <bean id="methodLogger" class="spring.aop.AopAdvices$LogAdvice" />
+  
+	
+</beans>

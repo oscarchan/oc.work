@@ -2,6 +2,7 @@ package ws.rs;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -11,6 +12,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+
+import org.jboss.resteasy.annotations.ClientResponseType;
 
 import common.SamplePojo;
 
@@ -67,6 +70,12 @@ public class RestSampleService
 		return "update-" + id + "-" + name;
 	}
 	
+	
+	@ClientResponseType
+	public String testResteasy(Date date)
+	{
+		return null;
+	}
 	
 	
 

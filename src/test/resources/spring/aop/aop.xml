@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+  xmlns="http://www.springframework.org/schema/beans"   
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"   
+  xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd 
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+  <bean id="sampleBean_pointCut_before" 
+    class="spring.beans.BeanObjects$SampleBean" />
+
+  <bean id="sampleBean_pointCut_afterReturning" 
+    class="spring.beans.BeanObjects$SampleBean" />
+    
+  <bean id="sampleBean_pointCut_afterThrowing" 
+    class="spring.beans.BeanObjects$SampleBean" />
+    
+  <bean id="sampleBean_pointCut_around" 
+    class="spring.beans.BeanObjects$SampleBean" />
+    
+  <bean id="methodBeforeLogger" class="spring.aop.AopAdvices$LogBeforeAdvice" />
+  <bean id="methodLogger" class="spring.aop.AopAdvices$LogAdvice" />
+  <bean id="methodTimingLogger" class="spring.aop.AopAdvices$TimingLogAdvice" />
+  
+  <bean id="methodArgReplacer" class="spring.aop.AopAdvices$ArgReplacementAdvice">
+    <constructor-arg>
+      <map>
+        <entry key="A" value="ReplacedA" />
+      </map>    
+    </constructor-arg>
+  </bean>
+
+ 	<aop:config proxy-target-class="true">  <!-- proxy-target-class is required to proxy to expose class instead of its interfaces -->
+ 
+    <!-- timing log every method -->
+ 	  <aop:advisor advice-ref="methodTimingLogger"  
+      pointcut="execution(* spring.beans.BeanObjects$SampleBean+.*(..) )"
+ 	  />
+   
+    <aop:advisor advice-ref="methodBeforeLogger"
+      pointcut="execution(* spring.beans.BeanObjects$SampleBean+.init(..) )" />
+
+    <aop:advisor advice-ref="methodTimingLogger"   
+      pointcut="execution(@org.springframework.transaction.annotation.Trasactional * spring.aop.SampleAopService.*.*(..) )" />
+      
+   <!-- log everything -->
+ 	  <aop:aspect ref="methodLogger" >
+ 	    <aop:pointcut id="getNameMethod" expression="execution(* spring.beans.BeanObjects$SampleBean+.get*(..))" />
+     
+      <!-- regex type does not work in 2.5.5 -->
+      <!-- aop:pointcut id="setNameMethod" expression="set.*Name" type="regex" />  --> 
+      <aop:pointcut id="throwExceptionMethod" expression="execution(* spring.beans.BeanObjects$SampleBean+.throw*(..))" />
+      
+ 	    <aop:around pointcut-ref="getNameMethod" method="around" />
+      
+      <!-- <aop:after pointcut-ref="setNameMethod" method="afterReturning" />  -->
+      <!-- <aop:after pointcut-ref="throwExceptionMethod" method="afterThrowing" />  --> 
+ 	  </aop:aspect>
+   
+   <!-- arg replacement -->
+   <!-- regex type does not work when aspectj type is in use -->
+<!--    <aop:aspect ref="methodArgReplacer" >-->
+<!--      <aop:pointcut id="returnObjectMethod" expression=".*returnObject" type="regex" /> -->
+<!--      <aop:around pointcut-ref="returnObjectMethod" method="replace" />-->
+<!--      -->
+<!--    </aop:aspect>-->
+   
+   
+   
+ 	</aop:config>
+ 
+ 
+ 
+
+  <!-- aop:config works with this factory -->  
+  <!--  bean class="spring.beans.BeanObjects$SampleBeanPostBeanFactory" /> -->
+  
+	
+</beans>
