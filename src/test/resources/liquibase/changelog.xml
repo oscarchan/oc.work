@@ -1,0 +1,1797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+    <changeSet author="ochan" id="1">
+        <comment>Test Insert</comment>
+        <insert tableName="test_table">
+          <column name="col1" valueNumeric="123" />
+          <column name="col2" valueBoolean="true" />
+        </insert>
+        <update tableName="test_table">
+          <column name="abc"></column>
+          <where>col1 = 123</where>
+        </update>
+        <rollback>
+          <delete tableName="test_table">
+            <where>pkg_id = 23 and game_id = 23</where>
+           </delete>
+        </rollback>
+    </changeSet>
+    
+    <changeSet author="wilson" id="1">
+        <comment>creating receipt attributes table to hold extra information</comment>
+        <sql>
+            <![CDATA[
+                    create table receipt_attributes (
+                        id integer not null auto_increment primary key,
+                        receipt_id integer not null,
+                        name varchar(255) not null,
+                        value varchar(255) not null,
+                        key idx_receipt_id_name (receipt_id, name),
+                        key idx_name (name)
+                    ) engine=InnoDB;
+            ]]>
+        </sql>
+        <rollback>
+          <delete tableName="test_table">
+            <where>pkg_id = 23 and game_id = 23</where>
+           </delete>
+        </rollback>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="1">
+    	<addColumn tableName="promotion_code_redemption">
+    		<column name="redemption_status" type="varchar(32)" />
+    	</addColumn>
+    </changeSet>
+
+    <changeSet author="cchen" id="1" context="local, staging">
+        <comment>update treasure callback zlive</comment>
+        <sql><![CDATA[
+            update games set callback_url='http://dlafrance.dev.zynga.com/cafeworld/htdocs/zlive/money/callback.php' where game_id = 69 and sn_id = 18;                        
+                ]]>
+        </sql>
+    </changeSet>
+
+	<changeSet author="mcheung" id="2" context="local, staging">
+		<sql>
+			<![CDATA[
+				update promotion_code_redemption set redemption_status = 'ACTIVE';
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="3">
+		<sql>
+			<![CDATA[
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 124, "Farm Viral Package", 0, 1, 0, "Farm Cash", "y", 0, 17761, 1);
+    			
+				insert into promotion_rule_set (rule_set_name) values ('FARM_VIRAL_RULE_SET');
+				
+    			insert into promotion_rule (rule_name, rule_type, priority, status, rule_set_id)
+    				select 'FARM_VIRAL_PROMO_PKG', 'GrantPackageRuleHandler', 0, 'ACTIVE', id from promotion_rule_set where rule_set_name = 'FARM_VIRAL_RULE_SET';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value) 
+    				select id, 'GAME_ID', '63' from promotion_rule where rule_name = 'FARM_VIRAL_PROMO_PKG';
+    			
+    			insert into promotion_rule_attribute (rule_id, name, value) 
+    				select id, 'PACKAGE_ID', '124' from promotion_rule where rule_name = 'FARM_VIRAL_PROMO_PKG';
+    		
+    			insert into promotion (promotion_name, promotion_type, rule_set_id, vendor_id, status, redeem_limit_type, redeem_limit) 
+    				select 'FARM_VIRAL_PROMO', 'SINGLE_CODE_PER_USER', id, 63, 'ACTIVE', 'UNLIMITED', 0 from promotion_rule_set where rule_set_name = 'FARM_VIRAL_RULE_SET'; 
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="4">
+		<sql>
+			<![CDATA[
+				update promotion_rule_set set rule_set_name = 'TEST_PROMO_RULESET2' where id = 3;
+			]]>
+		</sql>
+	</changeSet>
+	
+    <changeSet author="cchen" id="2" context="local, staging">
+        <comment>update treasure callback zlive</comment>
+        <sql><![CDATA[
+            update games set callback_url='http://ti.staging.zynga.com/zbill_cb.php' where game_id = 69 and sn_id = 18;
+                ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="3" context="local, staging">
+        <comment>update cafe callback zlive</comment>
+        <sql><![CDATA[
+            update games set callback_url='http://staging.cafe.zynga.com/current/zlive/money/callback.php' where game_id = 61 and sn_id = 18;
+                ]]>
+        </sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="5">
+    	<sql>
+    		<![CDATA[
+    			update promotion set promotion_type = 'SINGLE_USE' where promotion_type = 'SINGLE_CODE';
+    			update promotion set promotion_type = 'SINGLE_USE' where promotion_type = 'SINGLE_CODE_PER_USER';
+    			update promotion set promotion_type = 'MULTI_USE' where promotion_type = 'MULTI_CODE';
+    		]]>
+    	</sql>
+    </changeSet>
+
+     <changeSet author="cchen" id="4">
+        <comment>incentive for treasure</comment>
+        <sql>
+            insert into incentives (game_id, amount, currency, active, grant_category, grant_code) values (69, 25, 'Island Cash', 1, 2, 2);
+        </sql>
+    </changeSet>
+
+
+    <changeSet author="cchen" id="5" context="production">
+        <comment> mafia prod zlive</comment>
+        <sql><![CDATA[
+                insert into games (game_id, sn_id, name, short_name, zappkey, transition_zappkey, callback_url, return_url, ptech_merchant_id, soft_desc)
+                values (43,18, 'Mafia Wars', 'mafiawars', 'g0mKtfG5fqbTqXhxJLQMHsqTIWu0VNDlvh828lrwEdE=', 'g0mKtfG5fqbTqXhxJLQMHsqTIWu0VNDlvh828lrwEdE=', 'http://mwzy.mafiawars.com/mwzy/callback/zbill_callbackFile.php', 'http://site.zynga.com/mafiawars', '020372', 'Mafia Wars ZL');
+        ]]></sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="6" context="production">
+        <comment> farm prod zlive</comment>
+        <sql><![CDATA[
+            insert into games (game_id, sn_id, name, short_name, zappkey, callback_url, return_url, ptech_merchant_id, soft_desc) values (63,18, 'FarmVille', 'farmville', 'eQddJy7xPLTC55x2kLT7ueccfvAIhkwodcwWypQc4mk=', 'http://zlive.farmville.com/zbill_cb.php', 'http://site.zynga.com/farmville', '020372', 'FarmVille ZL');
+                  ]]></sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="2" context="local, staging">
+        <comment>Yoville zlive game entry</comment>
+        <sql>
+            <![CDATA[
+                    insert into games (game_id, sn_id, name, short_name, zappkey, callback_url, return_url, ptech_merchant_id, soft_desc)
+                    values (45, 18, 'YoVille', 'yoville', 'mHhKLmBAXtlsyvjigjXjOYkrWbd56aoz5RnqgH9xX8s=', 'http://jejikenwogu.dev.yoville.zynga.com/zl/zpay/callback.php', 'http://site.autov2.zlive.zynga.com/yoville2', '020372', 'YoVille ZL');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="3" context="production">
+        <comment>Yoville zlive game entry</comment>
+        <sql>
+            <![CDATA[
+                    insert into games (game_id, sn_id, name, short_name, zappkey, callback_url, return_url, ptech_merchant_id, soft_desc)
+                    values (45, 18, 'YoVille', 'yoville', 'mHhKLmBAXtlsyvjigjXjOYkrWbd56aoz5RnqgH9xX8s=', 'http://app2.yoville.com/zl/zpay/callback.php', 'http://site.zynga.com/yoville', '020372', 'YoVille ZL');
+            ]]>
+        </sql>
+    </changeSet>
+	
+	<changeSet author="mcheung" id="6">
+		<sql>
+			<![CDATA[
+				update promotion set promotion_type = 'SINGLE_USE_PER_USER' where promotion_name = 'FARM_VIRAL_PROMO'
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="7">
+		<comment>refactor rule type</comment>
+		<sql>
+			<![CDATA[
+				update promotion_rule set rule_type = 'SINGLE_PACKAGE' where rule_type = 'GrantPackageRuleHandler';
+				update promotion_rule set rule_type = 'MULTI_PACKAGE' where rule_type = 'MultiPackageRuleHandler';
+				update promotion_rule set rule_type = 'FAIL' where rule_type = 'FailRuleHandler';
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="8">
+		<sql>
+			<![CDATA[
+				update promotion_rule set rule_type = 'DIRECT_GRANT' where rule_name = 'FARM_VIRAL_PROMO_PKG';
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="9">
+		<sql>
+			<![CDATA[
+				update packages set grant_quantity = 1 where game_id = 63 and pkg_id = 124;
+			]]>
+		</sql>
+	</changeSet>
+
+    <changeSet author="cchen" id="7">
+        <comment> remove yoville tagged</comment>
+        <sql><![CDATA[
+                update games set zappkey='0', transition_zappkey='0' where game_id = 45 and sn_id = 10;
+                  ]]></sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="8">
+       <comment>incentive for farm</comment>
+       <sql>
+           insert into incentives (game_id, amount, currency, active, grant_category, grant_code) values (63, 25, 'FarmCash', 1, 0, 17514);
+       </sql>
+   </changeSet>
+
+	<changeSet author="mcheung" id="10">
+		<sql>
+			<![CDATA[
+				insert into promotion (promotion_name, promotion_type, rule_set_id, vendor_id, status, redeem_limit_type, redeem_limit) 
+				values ('SEVEN_ELEVEN_PROMO', 'MULTI_USE', null, 18, 'ACTIVE', 'UNLIMITED', 0);
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="11">
+		<sql>
+			<![CDATA[
+				insert into vendors values (18, "Seven Eleven", 1, 1, 0, 1, 0, 0, 0, 0);
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="12" context="local, staging">
+		<sql>
+			<![CDATA[
+				insert into vendor_attributes (vendor_id, name, value) values (18, 'zappkey', 'KAxkJdfGU1bDOAZlqOX/Qk6+jI7jSnW0JYuYdwszygQ=');
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="13" context="production">
+		<sql>
+			<![CDATA[
+				insert into vendor_attributes (vendor_id, name, value) values (18, 'zappkey', 'qqreZyrZSA5BkRsfLzu78akI1pUAtqhQonF9Acw3vdo=');
+			]]>
+		</sql>
+	</changeSet>
+
+    <changeSet author="wilson" id="4" context="production">
+        <comment>Treasure Isle game entry for sn_id=18</comment>
+        <sql>
+            <![CDATA[
+                    insert into games (game_id, sn_id, name, short_name, zappkey, callback_url, return_url, ptech_merchant_id, soft_desc)
+                    values (69, 18, 'Treasure Isle', 'treasureisle', 'OodWbUoL8WEruphNQGGfjAija7QdOXNGUAQUsjM06Xs=', 'http://fb-0.treasure.zynga.com/zbill_cb.php', 'http://site.zynga.com/treasureisle', '020372', 'Treasure ZL');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="5" context="production">
+        <comment>update new game entries w/ grantgoods_callback_url</comment>
+        <sql>
+            <![CDATA[
+                    update games set grantgoods_callback_url='http://zlive.farmville.com/zplatform.php' where game_id=63 and sn_id=18;
+                    update games set grantgoods_callback_url='http://mwzy.mafiawars.com/mwzy/grant/grant_client.php' where game_id=43 and sn_id=18;
+                    update games set grantgoods_callback_url='http://fb-0.treasure.zynga.com/grantgoods.php' where game_id=69 and sn_id=18;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="6" context="production">
+        <comment>cafe game entry for sn_id=18</comment>
+        <sql>
+            <![CDATA[
+                    insert into games (game_id, sn_id, name, short_name, zappkey, callback_url, return_url, ptech_merchant_id, soft_desc)
+                    values (61, 18, 'Cafe World', 'cafeworld', '7oRtb6/fbYFOAQBCs9iYrgBs7L5twW/GoyWVltQVqX0=', 'http://zlive-0.cafe.zynga.com/current/zlive/money/callback.php', 'http://site.zynga.com/cafeworld', '020372', 'Cafe World ZL');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="7">
+        <comment>client_id_log table</comment>
+        <sql>
+            <![CDATA[
+                    create table client_id_log (
+                        receipt_id integer not null primary key,
+                        client_id integer not null,
+                        key idx_client_id (client_id)
+                    ) engine=InnoDB;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="9">
+       <comment>update incentive for farm</comment>
+       <sql>
+           update incentives set amount = 1 where game_id = 63 and amount = 25 and grant_code = 17514 and active = 1;
+       </sql>
+   </changeSet>
+
+    <changeSet author="cchen" id="10" context="local,staging">
+       <comment>update grantgoods farm callback for farm</comment>
+       <sql>
+           update games set grantgoods_callback_url='http://apps.facebook.com/leahmfv/zplatform.php' where game_id = 63 and sn_id = 1;
+       </sql>
+   </changeSet>
+
+    <changeSet author="wilson" id="8" context="production">
+        <comment>insert into cpa_provider_secrets</comment>
+        <sql>insert into cpa_provider_secrets (id,provider_id,game_id,social_network_id,secret) values (7,9,43,18,'1660518698014696');</sql>
+    </changeSet>
+
+    <changeSet author="philip" id="1">
+        <comment>drop the obsolete columns from vendors</comment>
+        <sql>
+            alter table vendors drop column has_paymentsource;
+            alter table vendors drop column schedules_refund;
+            alter table vendors drop column requires_captcha;
+            alter table vendors drop column instant_settle;
+            alter table vendors drop column oneclick_enabled;
+            delete from vendor_attributes where vendor_id = 14 and name = 'has_paymentsource';
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="9" context="production">
+        <comment>update callback_url for cafe</comment>
+        <sql>update games set callback_url="http://fb-0.cafe.zynga.com/current/zlive/money/callback.php" where sn_id=18 and game_id=61;</sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="11">
+        <comment>update incentive for farm</comment>
+       <sql>
+           update incentives set amount = 25 where game_id = 63 and amount = 1 and grant_code = 17514 and active = 1;
+       </sql>
+   </changeSet>
+
+
+    <changeSet author="cchen" id="12" context="local,staging">
+       <comment>update grantgoods farm callback for farm</comment>
+       <sql>
+           update games set grantgoods_callback_url = 'http://stage.fv-dev.farmville.com/zplatform.php' where game_id = 63 and sn_id = 1;
+       </sql>
+   </changeSet>
+
+    <changeSet author="philip" id="2">
+        <comment>incomm still needs paymentsource</comment>
+        <sql>
+            insert into vendor_attributes(vendor_id, name, value) values (14, 'has_paymentsource', '1');
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="3">
+        <comment>incomm should always save payment source</comment>
+        <sql>
+            insert into vendor_attributes(vendor_id, name, value) values (14, 'save_paymentsource', '1');
+        </sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="14">
+    	<sql>
+    		<![CDATA[
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, upc) values (45,505,'10 YoCash ($10.00 USD)', 10.00, 1, 50, 'YoCash', 'y', '799366682257');
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, upc) values (45,506,'5000 YoCoins ($25.00 USD)', 25.00, 1, 5000, 'YoCoins', 'y', '799366682264');
+			
+				insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 505, 'DCMSID', '10840', 'ACTIVE');
+				insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 506, 'DCMSID', '10841', 'ACTIVE');
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="15">
+    	<sql>
+    		<![CDATA[
+    			update packages set points = 13000 where pkg_id = 506 and game_id = 45;
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, upc) values (45,507,'5000 YoCoins ($10.00 USD)', 10.00, 1, 5000, 'YoCoins', 'y', '799366682257');
+				insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 507, 'DCMSID', '10840', 'ACTIVE');
+
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, upc) values (45,508,'130 YoCash ($25.00 USD)', 25.00, 1, 130, 'YoCash', 'y', '799366682264');
+				insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 508, 'DCMSID', '10841', 'ACTIVE');
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="16">
+    	<sql>
+    		<![CDATA[
+    			update packages set description = '13000 YoCoins ($25.00 USD)' where pkg_id = 506 and game_id = 45;
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="17">
+    	<sql>
+    		<![CDATA[
+    			update packages set description = '50 YoCash ($10.00 USD)' where pkg_id = 505 and game_id = 45;
+    		]]>
+    	</sql>
+    </changeSet>
+ 
+    <changeSet author="wilson" id="10">
+        <comment>Creating new table vendor_subaccounts</comment>
+        <sql>
+            <![CDATA[
+                    create table vendor_subaccounts (
+                        id integer not null primary key auto_increment,
+                        vendor_id integer not null,
+                        vendor_sub_id integer not null,
+                        description varchar(255) default "",
+                        currency_code varchar(3) not null,
+                        unique key uni_vendor_id_vendor_sub_id (vendor_id, vendor_sub_id)
+                    ) ENGINE=InnoDB;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="11">
+        <comment>adding column vendor_sub_id to applicable tables</comment>
+        <sql>
+            <![CDATA[
+                    alter table ftp_downloads add column vendor_sub_id integer after vendor_acct;
+                    alter table ftp_uploads add column vendor_sub_id integer after vendor_acct;
+                    alter table download_queue add column vendor_sub_id integer after vendor_acct;
+                    alter table upload_queue add column vendor_sub_id integer after vendor_acct;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="12">
+        <comment>creating new package set w/ one discounted package for mafia</comment>
+        <sql>
+            <![CDATA[
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 647, '21 reward points for $5', 'mwcoins_image', 5, 1, 21, 'Reward Points', 'y', 200);
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 648, '42 reward points for $10', 'mwcoins_image', 10, 1, 42, 'Reward Points', 'y', 200);
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 649, '85 reward points for $20', 'mwcoins_image', 20, 1, 85, 'Reward Points', 'y', 200);
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 650, '170 reward points for $40', 'mwcoins_image', 40, 1, 170, 'Reward Points', 'y', 200);
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 651, '215 reward points for $50', 'mwcoins_image', 50, 1, 215, 'Reward Points', 'y', 200);
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 652, '440 reward points for $100', 'mwcoins_image', 100, 1, 440, 'Reward Points', 'y', 200);
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 653, '700 reward points for $150', 'mwcoins_image', 150, 1, 700, 'Reward Points', 'y', 200);
+                    insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, active, set_id)
+                    values (43, 654, '1000 reward points for $200', 'mwcoins_image', 200, 1, 1000, 'Reward Points', 'y', 200);
+
+                    insert into discounts (id, game_id, discount_package_type, discount_package_key, discount, retailer, currency_code, country_code) values (63, 43, 'PACKAGE_ID', 647, 0.9, 'ZYNGA', '[a-zA-Z]+', '[a-zA-Z]+');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="13" context="local, staging, qa">
+        <comment>add missing column to ftp_uploads</comment>
+        <sql>alter table ftp_uploads add column upload_source tinyint(4) default 1;</sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="15">
+        <comment>adding column vendor_sub_id to retry_queue_entry</comment>
+        <sql>alter table retry_queue_entry add column vendor_sub_id integer after vendor_id;</sql>
+    </changeSet>
+    
+
+    <changeSet author="cchen" id="13">
+        <comment> add game currency for incomm for cafe + pet + treasure</comment>
+        <insert tableName="game_currency">
+            <column name="game_id" value="61" />
+            <column name="game_currency_type" value="CASH" />
+            <column name="description" value="Cafe Cash" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+
+        <insert tableName="game_currency">
+            <column name="game_id" value="61" />
+            <column name="game_currency_type" value="COIN" />
+            <column name="description" value="Cafe Coins" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+
+        <insert tableName="game_currency">
+            <column name="game_id" value="69" />
+            <column name="game_currency_type" value="CASH" />
+            <column name="description" value="Island Cash" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+
+        <insert tableName="game_currency">
+            <column name="game_id" value="69" />
+            <column name="game_currency_type" value="COIN" />
+            <column name="description" value="Island Coins" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+
+        <insert tableName="game_currency">
+            <column name="game_id" value="64" />
+            <column name="game_currency_type" value="CASH" />
+            <column name="description" value="PetCash" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+
+        <insert tableName="game_currency">
+            <column name="game_id" value="64" />
+            <column name="game_currency_type" value="COIN" />
+            <column name="description" value="Coins" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+    </changeSet>
+
+	<changeSet author="mcheung" id="18">
+		<comment>Create 7/11 farm packages</comment>
+		<sql>
+		<![CDATA[
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 125, 'Chocolate Parsimon', 0, 1, 0, 'FarmCash', 'y', 0, 18529, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 125, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 125, 'PROMOTION_ITEM_ID', 'FARM_CHOCOLATE_PARSIMON', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 126, 'Neopolitan Cow', 0, 1, 0, 'FarmCash', 'y', 0, 18530, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 126, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 126, 'PROMOTION_ITEM_ID', 'FARM_NEOPOLITAN_COW', 'ACTIVE');
+
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 127, 'Neopolitan Calf', 0, 1, 0, 'FarmCash', 'y', 0, 18531, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 127, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 127, 'PROMOTION_ITEM_ID', 'FARM_NEOPOLITAN_CALF', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 128, 'Normal Tower', 0, 1, 0, 'FarmCash', 'y', 0, 18532, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 128, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 128, 'PROMOTION_ITEM_ID', 'FARM_NORMAL_TOWER', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 129, 'Sandwich Cart', 0, 1, 0, 'FarmCash', 'y', 0, 18533, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 129, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 129, 'PROMOTION_ITEM_ID', 'FARM_SANDWICH_CART', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 130, 'Coffee Cart', 0, 1, 0, 'FarmCash', 'y', 0, 18534, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 130, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 130, 'PROMOTION_ITEM_ID', 'FARM_COFFEE_CART', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 131, 'Waterslide', 0, 1, 0, 'FarmCash', 'y', 0, 18535, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 131, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 131, 'PROMOTION_ITEM_ID', 'FARM_WATERSLIDE', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 132, 'Cow High Dive', 0, 1, 0, 'FarmCash', 'y', 0, 18536, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 132, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 132, 'PROMOTION_ITEM_ID', 'FARM_COW_HIGH_DIVE', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 133, 'Goji Berry Mastery Sign', 0, 1, 0, 'FarmCash', 'y', 0, 18537, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 133, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 133, 'PROMOTION_ITEM_ID', 'FARM_GOJI_BERRY_MASTERY_SIGN', 'ACTIVE');
+    			
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 134, 'Goji berry Crop Engagement', 0, 1, 0, 'FarmCash', 'y', 0, 18538, 1);
+    	]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="19">
+		<comment>Create 7/11 Yoville packages</comment>
+		<sql>
+		<![CDATA[
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 509, 'Slurpee Wall Freezer', 0, 1, 0, 'YoCoins', 'y', 2012, 32898, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 509, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 509, 'PROMOTION_ITEM_ID', 'YO_SLUREPEE_WALL_FREEZER', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 510, '7 Select Candy Stand', 0, 1, 0, 'YoCoins', 'y', 2012, 32901, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 510, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 510, 'PROMOTION_ITEM_ID', 'YO_7_SELECT_CANDY', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 511, 'Orange Soda Machine', 0, 1, 0, 'YoCoins', 'y', 2012, 32925, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 511, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 511, 'PROMOTION_ITEM_ID', 'YO_ORANGE_SODA_MACHINE', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 512, '4pk Donuts Donut Stand', 0, 1, 0, 'YoCoins', 'y', 2012, 32923, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 512, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 512, 'PROMOTION_ITEM_ID', 'YO_4PK_DONUTS_STAND', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 513, 'Big Gulp Hamburger Stand', 0, 1, 0, 'YoCoins', 'y', 2012, 32923, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 513, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 513, 'PROMOTION_ITEM_ID', 'YO_BIG_GULP_HAMBURGER_STAND', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 514, 'Brownie Coffee Machine', 0, 1, 0, 'YoCoins', 'y', 2012, 32899, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 514, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 514, 'PROMOTION_ITEM_ID', 'YO_BROWNIE_COFFE_MACHINE', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 515, 'Brownie Coffee Machine', 0, 1, 0, 'YoCoins', 'y', 2012, 32899, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 515, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 515, 'PROMOTION_ITEM_ID', 'YO_BROWNIE_COFFE_MACHINE', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 516, 'YoVille Game Card Nacho Machine', 0, 1, 0, 'YoCoins', 'y', 2012, 32922, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 516, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 516, 'PROMOTION_ITEM_ID', 'YO_GAME_CARD_NACHO_MACHINE', 'ACTIVE');
+    			
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 517, 'Hot Dog Roller', 0, 1, 0, 'YoCoins', 'y', 2012, 32897, 1);
+			]]>
+		</sql>
+	</changeSet>
+
+	<changeSet author="mcheung" id="20">
+		<comment>Create 7/11 MW packages</comment>
+		<sql>
+			<![CDATA[
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 655, 'Showman', 0, 1, 0, 'Reward Points', 'y', 0, 712, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 655, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 655, 'PROMOTION_ITEM_ID', 'MW_SHOWNAME', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 656, 'Lone Wolf', 0, 1, 0, 'Reward Points', 'y', 0, 713, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 656, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 656, 'PROMOTION_ITEM_ID', 'MW_LONE_WOLF', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 657, 'Pepper Shaker', 0, 1, 0, 'Reward Points', 'y', 0, 714, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 657, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 657, 'PROMOTION_ITEM_ID', 'MW_PEPPER_SHAKER', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 658, 'Sleek Bulletproof Vest', 0, 1, 0, 'Reward Points', 'y', 0, 715, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 658, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 658, 'PROMOTION_ITEM_ID', 'MW_SLEEK_BULLETPROOF_VEST', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 659, 'Palermo Prowler', 0, 1, 0, 'Reward Points', 'y', 0, 716, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 659, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 659, 'PROMOTION_ITEM_ID', 'MW_PALERMO_PROWLER', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 660, 'Trio Diva', 0, 1, 0, 'Reward Points', 'y', 0, 717, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 660, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 660, 'PROMOTION_ITEM_ID', 'MW_TRIO_DIVA', 'ACTIVE');
+				
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 661, 'Combat Helmet', 0, 1, 0, 'Reward Points', 'y', 0, 718, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 661, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 661, 'PROMOTION_ITEM_ID', 'MW_COMBAT_HELMET', 'ACTIVE');
+    			
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 662, 'Combat Helmet', 0, 1, 0, 'Reward Points', 'y', 0, 719, 1);
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 662, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (43, 662, 'PROMOTION_ITEM_ID', 'MW_22LR', 'ACTIVE');
+			]]>
+		</sql>
+	</changeSet>
+   
+   <changeSet author="mcheung" id="21">
+   		<comment>Added seven eleven rules</comment>
+    	<sql>
+    		<![CDATA[
+    			insert into promotion_rule_set (rule_set_name) values ('SEVEN_ELEVEN_RULE_SET');
+    			
+    			insert into promotion_rule (rule_name, rule_type, priority, status, rule_set_id)  
+    				select 'SEVEN_ELEVEN_VELOCITY', 'VELOCITY', 0, 'ACTIVE', id from promotion_rule_set where rule_set_name = 'SEVEN_ELEVEN_RULE_SET';
+    			
+    			insert into promotion_rule_attribute (rule_id, name, value)  
+    				select id, 'TOTAL_REDEMPTION_PER_DAY', '10' from promotion_rule where rule_name = 'SEVEN_ELEVEN_VELOCITY';	 
+    			
+    			insert into promotion_rule_attribute (rule_id, name, value)  
+    				select id, 'SAME_ITEM_REDEMPTION_PER_DAY', '5' from promotion_rule where rule_name = 'SEVEN_ELEVEN_VELOCITY';	 
+    				
+    			insert into promotion_rule (rule_name, rule_type, priority, status, rule_set_id)  
+    				select 'SEVEN_ELEVEN_MULTI_GRANT', 'MULTI_PACKAGE', 1, 'ACTIVE', id from promotion_rule_set where rule_set_name = 'SEVEN_ELEVEN_RULE_SET';
+    			
+    			insert into promotion_rule (rule_name, rule_type, priority, status, rule_set_id)  
+    				select 'SEVEN_ELEVEN_FARM_PREREQ_GRANT', 'PREREQUISITE_PACKAGE', 2, 'ACTIVE', id from promotion_rule_set where rule_set_name = 'SEVEN_ELEVEN_RULE_SET';
+    			insert into promotion_rule_attribute (rule_id, name, value)  
+    				select id, 'GAME_ID', '63' from promotion_rule where rule_name = 'SEVEN_ELEVEN_FARM_PREREQ_GRANT'; 
+    			insert into promotion_rule_attribute (rule_id, name, value)  
+    				select id, 'PACKAGE_ID', '18538' from promotion_rule where rule_name = 'SEVEN_ELEVEN_FARM_PREREQ_GRANT'; 
+    				
+    			insert into promotion_rule (rule_name, rule_type, priority, status, rule_set_id)  
+    				select 'SEVEN_ELEVEN_YOVILLE_PREREQ_GRANT', 'PREREQUISITE_PACKAGE', 3, 'ACTIVE', id from promotion_rule_set where rule_set_name = 'SEVEN_ELEVEN_RULE_SET';
+    			insert into promotion_rule_attribute (rule_id, name, value)  
+    				select id, 'GAME_ID', '45' from promotion_rule where rule_name = 'SEVEN_ELEVEN_YOVILLE_PREREQ_GRANT'; 
+    			insert into promotion_rule_attribute (rule_id, name, value)  
+    				select id, 'PACKAGE_ID', '517' from promotion_rule where rule_name = 'SEVEN_ELEVEN_YOVILLE_PREREQ_GRANT';
+    		
+    			update promotion set rule_set_id = (select id from promotion_rule_set where rule_set_name = 'SEVEN_ELEVEN_RULE_SET') where promotion_name = 'SEVEN_ELEVEN_PROMO';
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="cchen" id="14">
+        <comment>update defaults for existing incomm packages</comment>
+        <sql>
+            <![CDATA[
+                update packages set is_default = 1 where game_id = 43 and active = 'y' and upc != '';
+                update packages set is_default = 1 where game_id = 45 and active = 'y' and upc != '' and currency='YoCash';
+                update packages set is_default = 1 where game_id = 63 and active = 'y' and upc != '' and currency='FarmCash';
+                    ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="15">
+        <comment> walmart cards for farm </comment>
+        <sql>
+            <![CDATA[
+            INSERT INTO `packages` VALUES
+            (63,135,'55 FarmCash ($10.00 USD)',NULL,NULL,NULL,NULL,'10.00',1,55,'FarmCash','y','2000-01-01 05:00:01','2030-01-01 05:00:01','2010-05-05 18:30:46',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'799366688655',NULL,0,0,NULL,NULL,1,0,NULL),
+            (63,136,'15,800 FarmVille Coins ($10.00 USD)',NULL,NULL,NULL,NULL,'10.00',1,15800,'FarmVille Coins','y','2000-01-01 05:00:01','2030-01-01 05:00:01','2010-02-01 23:30:06',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'799366688655',NULL,0,0,NULL,NULL,0,0,NULL);
+
+            insert into package_attributes (game_id, pkg_id, name, value, status) values (63,135, 'DCMSID', '10990', 'ACTIVE');
+            insert into package_attributes (game_id, pkg_id, name, value, status) values (63,136, 'DCMSID', '10990', 'ACTIVE');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="16">
+        <comment> 20$ cards for farm </comment>
+        <sql>
+            <![CDATA[
+            INSERT INTO `packages` VALUES
+            (63,137,'115 FarmCash ($20.00 USD)',NULL,NULL,NULL,NULL,'20.00',1,115,'FarmCash','y','2000-01-01 05:00:01','2030-01-01 05:00:01','2010-05-05 18:30:46',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'799366692027',NULL,0,0,NULL,NULL,1,0,NULL),
+            (63,138,'33,300 FarmVille Coins ($20.00 USD)',NULL,NULL,NULL,NULL,'20.00',1,33300,'FarmVille Coins','y','2000-01-01 05:00:01','2030-01-01 05:00:01','2010-02-01 23:30:06',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,'799366692027',NULL,0,0,NULL,NULL,0,0,NULL);
+
+            insert into package_attributes (game_id, pkg_id, name, value, status) values (63,137, 'DCMSID', '11026', 'ACTIVE');
+            insert into package_attributes (game_id, pkg_id, name, value, status) values (63,138, 'DCMSID', '11026', 'ACTIVE');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="4">
+        <comment>add max_id to states</comment>
+        <sql>
+            <![CDATA[
+                    alter table states add column max_id bigint(20) default 0 after last_id;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="cchen" id="17">
+        <comment> add game currency for incomm for fish</comment>
+        <insert tableName="game_currency">
+            <column name="game_id" value="66" />
+            <column name="game_currency_type" value="CASH" />
+            <column name="description" value="Sand Dollars" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+
+        <insert tableName="game_currency">
+            <column name="game_id" value="66" />
+            <column name="game_currency_type" value="COIN" />
+            <column name="description" value="Coins" />
+            <column name="incomm_enabled" value="1" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="mcheung" id="22">
+    	<sql>
+    		delete from packages where game_id = 45 and pkg_id = 515;
+    		delete from package_attributes where game_id = 45 and pkg_id = 515;
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="23">
+    	<sql>
+    		update promotion_rule set rule_name = 'SEVEN_ELEVEN_UBER_GRANT' where rule_name = 'SEVEN_ELEVEN_FARM_PREREQ_GRANT';
+    			
+    		insert into promotion_rule_attribute (rule_id, name, value) 
+    			select id, 'PREREQ_PROMOTION_ITEMS', '' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+
+			delete from promotion_rule_attribute where rule_id in (select id from promotion_rule where rule_name = 'SEVEN_ELEVEN_YOVILLE_PREREQ_GRANT');    			
+    		delete from promotion_rule where rule_name = 'SEVEN_ELEVEN_YOVILLE_PREREQ_GRANT';
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="24">
+    	<sql>
+    		<![CDATA[
+    			delete from promotion_rule_attribute where name = 'PREREQ_LIMIT';
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="25">
+    	<comment>added yoville uber item</comment>
+    	<sql>
+    		<![CDATA[
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (45, 518, 'YoVille Uber Gift Slurpee Machine', 0, 1, 0, 'YoCoins', 'y', 2012, 32924, 1);
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 139, '200 Farm Cash', 0, 1, 0, 'FarmCash', 'y', 0, 18539, 1);	
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (43, 663, '50 Skill Points', 0, 1, 0, 'Reward Points', 'y', 0, 4, 50);	
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="26">
+    	<comment>Configure 7/11 prerequisite items</comment>
+    	<sql>
+    		<![CDATA[
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_CHOCOLATE_PARSIMON' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_NEOPOLITAN_COW' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_NEOPOLITAN_CALF' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_NORMAL_TOWER' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_SANDWICH_CART' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_COFFEE_CART' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_WATERSLIDE' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_COW_HIGH_DIVE' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'FARM_GOJI_BERRY_MASTERY_SIGN' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'YO_SLUREPEE_WALL_FREEZER' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'YO_7_SELECT_CANDY' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'YO_ORANGE_SODA_MACHINE' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'YO_4PK_DONUTS_STAND' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'YO_BIG_GULP_HAMBURGER_STAND' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'YO_BROWNIE_COFFE_MACHINE' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'YO_GAME_CARD_NACHO_MACHINE' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_SHOWNAME' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_LONE_WOLF' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_PEPPER_SHAKER' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_SLEEK_BULLETPROOF_VEST' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_PALERMO_PROWLER' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_TRIO_DIVA' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_COMBAT_HELMET' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_PROMOTION_ITEM', 'MW_22LR' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_GRANT_ITEMS', '45:518,63:139,43:663' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="27">
+    	<sql>
+    		<![CDATA[
+    			insert into promotion_rule_attribute (rule_id, name, value)
+    				select id, 'PREREQ_ENTITLEMENT_ID', 'UBER_ITEM_GRANTED' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="28">
+    	<comment>Deleted promotion rule attribute</comment>
+    	<sql>
+    		<![CDATA[
+    			delete from promotion_rule_attribute where name = 'PREREQ_PROMOTION_ITEMS';
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="29">
+    	<comment>clean up incomm card items and velocity</comment>
+    	<sql>
+    		<![CDATA[
+    			delete from promotion_rule_attribute where name = 'YO_GAME_CARD_NACHO_MACHINE';
+    			delete from promotion_rule_attribute where name = 'MW_COMBAT_HELMET';
+    			
+    			update promotion_rule_attribute set value = '3' where name = 'SAME_ITEM_REDEMPTION_PER_DAY' and rule_id =
+    				(select id from promotion_rule where rule_name = 'SEVEN_ELEVEN_VELOCITY');
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="30">
+    	<comment>update packages grant</comment>
+    	<sql>
+    		<![CDATA[
+    			update packages set points = grant_quantity where grant_code is not null;
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="31">
+    	<comment>add all in-game engagement</comment>
+    	<sql>
+    		<![CDATA[
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 517, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 517, 'PROMOTION_ITEM_ID', 'YO_HOT_DOT_ROLLER', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 134, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 134, 'PROMOTION_ITEM_ID', 'YO_HOT_DOT_ROLLER', 'ACTIVE');
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="32">
+    	<sql>
+    		<![CDATA[
+    			update package_attributes set value = 'FARM_GOJI_BERRY_CROP' where game_id = 63 and pkg_id = 134;
+    		]]>
+    	</sql>
+    </changeSet>
+
+	<changeSet author="mcheung" id="33">
+		<sql>
+			<![CDATA[
+				update promotion_rule set rule_type = 'SEVEN_ELEVEN_UBER' where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="34">
+		<comment>update seven eleven vendor</comment>
+		<sql>
+			<![CDATA[
+				insert into vendor_attributes (vendor_id, name, value) values (18, 'has_paymentsource', '1');
+				insert into vendor_attributes (vendor_id, name, value) values (18, 'use_grant_goods', '1');
+				insert into vendor_attributes (vendor_id, name, value) values (18, 'noncashflow_settle', '1');
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="35">
+		<comment>fix engagement piece data</comment>
+		<sql>
+			<![CDATA[
+				update package_attributes set value = 'SEVEN_ELEVEN_PROMO' where game_id = 63 and pkg_id = 134 and name = 'PROMOTION_ITEM_CODE';
+				update packages set description = '3-22LR' where game_id = 45 and pkg_id = 662;
+				insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 662, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+				insert into package_attributes (game_id, pkg_id, name, value, status) values (45, 662, 'PROMOTION_ITEM_ID', 'MW_22LR', 'ACTIVE');
+			]]>
+		</sql>
+	</changeSet>
+
+	<changeSet author="mcheung" id="36">
+		<sql>
+			<![CDATA[
+				delete from package_attributes where game_id = 45 and pkg_id = 662;
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="37">
+		<sql>
+			<![CDATA[
+				update package_attributes set value = 'YO_HOT_DOG_ROLLER' where game_id = 45 and pkg_id = 517 and name = 'PROMOTION_ITEM_ID'; 
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="38">
+		<comment>fixed grant code for seven eleven items</comment>
+		<sql>
+			<![CDATA[
+				update packages set grant_code = 32920 where game_id = 45 and pkg_id = 513;
+				update packages set description = '3- 22LR' where game_id = 43 and pkg_id = 662;   
+				update packages set grant_category = 3 where game_id = 43 and pkg_id >= 655 and pkg_id <= 662;
+			]]>
+		</sql>
+	</changeSet>
+
+	<changeSet author="mcheung" id="39">
+		<sql>
+			<![CDATA[
+				update packages set grant_category = 4, grant_code = 0 where game_id = 43 and pkg_id = 663;
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="40">
+		<comment>refactor promotion rule set to be many to many</comment>
+		<createTable tableName="promotion_rule_map">
+			<column name="promotion_id" type="int(11)" />
+			<column name="promotion_rule_id" type="int(11)" />
+		</createTable>
+		<addUniqueConstraint tableName="promotion_rule_map" columnNames="promotion_id, promotion_rule_id" constraintName="uniq_promotion_rule_map" />
+	</changeSet>
+	
+	<changeSet author="mcheung" id="41">
+		<comment>refactor promotion rule set to mapping table</comment>
+		<sql>
+			<![CDATA[
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id as promotion_id, r.id as promotion_rule_id from promotion p, promotion_rule r where p.rule_set_id = r.rule_set_id;
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="42">
+		<comment></comment>
+		<dropColumn tableName="promotion" columnName="rule_set_id"/>
+		<dropColumn tableName="promotion_rule" columnName="rule_set_id" />
+		<dropTable tableName="promotion_rule_set" />
+	</changeSet>
+	
+	<changeSet author="mcheung" id="43">
+		<sql>
+			<![CDATA[
+				insert into promotion (promotion_name, promotion_type, vendor_id, status, redeem_limit_type)
+					values ('SEVEN_ELEVEN_GAMECARD', 'SINGLE_USE', 14, 'ACTIVE', 'UNLIMITED');
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_GAMECARD' and rule.rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="44">
+		<dropUniqueConstraint tableName="promotion" constraintName="promotion_name"/>
+		<addUniqueConstraint tableName="promotion" constraintName="uniq_promotion_name_vendor" columnNames="promotion_name, vendor_id"/>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="45">
+		<sql>
+			<![CDATA[
+				insert into promotion_rule (rule_name, rule_type, priority, status) values ('SEVEN_ELEVEN_CALLBACK', 'SEVEN_ELEVEN_CALLBACK', 10, 'ACTIVE');
+			
+				update promotion set promotion_name = 'SEVEN_ELEVEN_PROMO' where promotion_name = 'SEVEN_ELEVEN_GAMECARD';
+			
+				insert into promotion (promotion_name, promotion_type, vendor_id, status, redeem_limit_type)
+					values ('SEVEN_ELEVEN_PROMO', 'MULTI_USE', 43, 'ACTIVE', 'UNLIMITED');
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 43 and rule.rule_name = 'SEVEN_ELEVEN_MULTI_GRANT';
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 43 and rule.rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 43 and rule.rule_name = 'SEVEN_ELEVEN_CALLBACK';
+					
+				insert into promotion (promotion_name, promotion_type, vendor_id, status, redeem_limit_type)
+					values ('SEVEN_ELEVEN_PROMO', 'MULTI_USE', 45, 'ACTIVE', 'UNLIMITED');
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 45 and rule.rule_name = 'SEVEN_ELEVEN_MULTI_GRANT';
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 45 and rule.rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 45 and rule.rule_name = 'SEVEN_ELEVEN_CALLBACK';
+					
+				insert into promotion (promotion_name, promotion_type, vendor_id, status, redeem_limit_type)
+					values ('SEVEN_ELEVEN_PROMO', 'MULTI_USE', 63, 'ACTIVE', 'UNLIMITED');
+				
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 63 and rule.rule_name = 'SEVEN_ELEVEN_MULTI_GRANT';
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 63 and rule.rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 63 and rule.rule_name = 'SEVEN_ELEVEN_CALLBACK';
+					
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 18 and rule.rule_name = 'SEVEN_ELEVEN_CALLBACK';
+				
+				update promotion set redeem_limit_type = 'LIFE_TIME', redeem_limit = 103 where promotion_name = 'SEVEN_ELEVEN_PROMO' and vendor_id = 18;
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="46">
+		<sql>
+			<![CDATA[
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 14 and rule.rule_name = 'SEVEN_ELEVEN_CALLBACK';
+			]]>
+		</sql>
+	</changeSet>
+
+	<changeSet author="mcheung" id="47">
+		<comment>Add poker hardpass</comment>
+		<sql>
+			<![CDATA[
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 30000004469, '67.207.96.194', '255.255.255.0','mondaytesting001@mail.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 30000004472, '67.207.96.194', '255.255.255.0','mondaytesting002@mail.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20214253196, '67.207.96.194', '255.255.255.0','thomastest002@gmail.com ');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20179725716, '67.207.96.194', '255.255.255.0','thomastest003@gmail.com ');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 30002212410, '67.207.96.194', '255.255.255.0','donnieb@mail.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 30002212405, '67.207.96.194', '255.255.255.0','burgandy22@gmail.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20185038586, '67.207.96.194', '255.255.255.0','coletrain004@yahoo.com  ');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20192353031, '67.207.96.194', '255.255.255.0','coletrain006@yahoo.com ');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 30002608265, '67.207.96.194', '255.255.255.0','bobbyhill79@gmail.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20029975149, '67.207.96.194', '255.255.255.0','domdecoco@yahoo.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20112914004, '67.207.96.194', '255.255.255.0','leon@zynga.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20152380781, '67.207.96.194', '255.255.255.0','ninjazyn4@gmail.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 30000004470, '67.207.96.194', '255.255.255.0','khannoonien@mail.com');
+insert into hard_pass (sn_id, uid, ip, netmask, email) values (18, 20193380933, '67.207.96.194', '255.255.255.0','clothesbootswhy@gmail.com  ');
+			]]>
+		</sql>
+	</changeSet>
+		
+	<changeSet author="mcheung" id="48">
+		<comment>setup a default vendor id for processor</comment>
+		<sql>
+			<![CDATA[
+				insert into promotion_rule_attribute  (rule_id, name, value)
+					select id, 'VENDOR_ID', '18' from promotion_rule where rule_name = 'SEVEN_ELEVEN_MULTI_GRANT';
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="49">
+		<comment>create packages for farm viral</comment>
+		<sql>
+			<![CDATA[
+				insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 140, "Farm Viral Package 2", 0, 1, 1, "Farm Cash", "y", 0, 18281, 1);
+    			
+				insert into promotion_rule (rule_name, rule_type, priority, status) values ('FARM_VIRAL_PROMO_PKG2', 'DIRECT_GRANT', 0, 'ACTIVE');
+    				
+    			insert into promotion_rule_attribute (rule_id, name, value) 
+    				select id, 'GAME_ID', '63' from promotion_rule where rule_name = 'FARM_VIRAL_PROMO_PKG2';
+    			
+    			insert into promotion_rule_attribute (rule_id, name, value) 
+    				select id, 'PACKAGE_ID', '140' from promotion_rule where rule_name = 'FARM_VIRAL_PROMO_PKG2';
+    		
+    			insert into promotion (promotion_name, promotion_type, vendor_id, status, redeem_limit_type, redeem_limit) 
+    				values ('FARM_VIRAL_PROMO2', 'SINGLE_USE_PER_USER', 63, 'ACTIVE', 'UNLIMITED', 0);
+    	
+				insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'FARM_VIRAL_PROMO2' and rule.rule_name = 'FARM_VIRAL_PROMO_PKG2';
+			]]>
+		</sql>
+	</changeSet>
+	
+	<changeSet author="mcheung" id="50">
+		<comment>updated vendor to 18</comment>
+		<sql>
+			<![CDATA[
+				insert into promotion_rule_attribute (rule_id, name, value)
+					select id, 'VENDOR_ID', '18' from promotion_rule where rule_name = 'SEVEN_ELEVEN_UBER_GRANT';
+			]]>
+		</sql>
+	</changeSet>
+	
+    <changeSet author="cchen" id="18">
+        <comment>yoville promo set</comment>
+        <sql>
+            <![CDATA[
+        INSERT INTO `packages` VALUES
+        (45,519,'25 YoCash (5.00 USD)',NULL,'yoCash_header','yocash_image',NULL,'5.00',1,25,'YoCash','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,520,'50 YoCash (10.00 USD)',NULL,'yoCash_header','yocash_image',NULL,'10.00',1,50,'YoCash','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,521,'100 YoCash (18.00 USD)',NULL,'yoCash_header','yocash_image',NULL,'18.00',1,100,'YoCash','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,522,'150 YoCash (27.00 USD)',NULL,'yoCash_header','yocash_image',NULL,'27.00',1,150,'YoCash','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,523,'200 YoCash (34.00 USD)',NULL,'yoCash_header','yocash_image',NULL,'34.00',1,200,'YoCash','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,524,'300 YoCash (50.00 USD)',NULL,'yoCash_header','yocash_image',NULL,'50.00',1,300,'YoCash','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,1,201,NULL),
+        (45,525,'715 YoCash (100.00 USD)',NULL,'yoCash_header','yocash_image',NULL,'100.00',1,715,'YoCash','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,526,'5,000 YoCoins (10.00 USD)',NULL,'yoCoins_header','yocoins_image',NULL,'10.00',1,5000,'YoCoins','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,527,'10,000 YoCoins (20.00 USD)',NULL,'yoCoins_header','yocoins_image',NULL,'20.00',1,10000,'YoCoins','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,528,'20,000 YoCoins (35.00 USD)',NULL,'yoCoins_header','yocoins_image',NULL,'30.00',1,20000,'YoCoins','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,529,'30,000 YoCoins (50.00 USD)',NULL,'yoCoins_header','yocoins_image',NULL,'50.00',1,30000,'YoCoins','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL),
+        (45,530,'70,000 YoCoins (100.00 USD)',NULL,'yoCoins_header','yocoins_image',NULL,'100.00',1,70000,'YoCoins','y','2000-01-01 05:00:01','2010-05-09 07:00:00','2010-05-07 04:00:00',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,0,201,NULL);
+                    ]]>
+        </sql>
+        
+    </changeSet>
+
+    <changeSet author="cchen" id="19">
+        <comment>desc2 for yoville promo set</comment>
+        <sql>
+            <![CDATA[
+             update packages set desc2='<div class="valueText"></div>' where game_id = 45 and pkg_id = 525;
+                    ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="5">
+        <comment>vendor_subaccounts and atatributes</comment>
+        <sql>
+            <![CDATA[
+                    alter table vendor_subaccounts drop column currency_code;
+
+                    CREATE TABLE `vendor_subaccount_attributes` (
+                    `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                    `vendor_id` int(11) NOT NULL,
+                    `vendor_sub_id` int(11) NOT NULL,
+                    `name` varchar(40) NOT NULL,
+                    `value` varchar(255) DEFAULT NULL,
+                    PRIMARY KEY (`id`),
+                    KEY vendor_id_sub_id (`vendor_id`, `vendor_sub_id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+                    insert into vendor_subaccounts (vendor_id, vendor_sub_id, description) values (14, 1, 'Cananda');
+                    insert into vendor_subaccounts (vendor_id, vendor_sub_id, description) values (14, 2, 'UK');
+
+                    insert into vendor_subaccount_attributes (vendor_id, vendor_sub_id, name, value) values (14, 1, 'CURRENCY_CODE', 'CAD');
+                    insert into vendor_subaccount_attributes (vendor_id, vendor_sub_id, name, value) values (14, 2, 'CURRENCY_CODE', 'GBP');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="6">
+        <comment>use lower case for name in vendor_subaccount_attributes</comment>
+        <sql>
+            update vendor_subaccount_attributes set name = 'currency_code' where name = 'CURRENCY_CODE';
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="7">
+        <comment>set default vendor_acct/vendor_sub_id to not null 0</comment>
+        <sql>
+            alter table download_queue modify column vendor_acct int(11) NOT NULL;
+            update download_queue set vendor_sub_id = 0 where vendor_sub_id is null;
+            alter table download_queue modify column vendor_sub_id int(11) NOT NULL default 0;
+            alter table upload_queue modify column vendor_acct int(11) NOT NULL;
+            update upload_queue set vendor_sub_id = 0 where vendor_sub_id is null;
+            alter table upload_queue modify column vendor_sub_id int(11) NOT NULL default 0;
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="8">
+        <comment>dfr_retry_queue table</comment>
+        <sql>
+            <![CDATA[
+                CREATE TABLE `dfr_retry_queue` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `name` varchar(128) DEFAULT NULL,
+                `vendor_acct` int(11) NOT NULL,
+                `vendor_sub_id` int(11) NOT NULL DEFAULT '0',
+                `modified_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+                `processed` int(11) DEFAULT '0',
+                `attempts` int(11) DEFAULT '0',
+                `file_name` varchar(128) DEFAULT NULL,
+                `line` int(11) NOT NULL,
+                `data` varchar(1024),
+                PRIMARY KEY (`id`),
+                KEY `dfr_retry_queue_vendor_id_sub_id` (`vendor_acct`, `vendor_sub_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="16">
+        <comment>create new ledger code entry for incomm redemption reversals</comment>
+        <sql>insert into ledger_codes (major_type, minor_type, name) values (12, 12335, 'incomm_reversal');</sql>
+    </changeSet>
+
+    <changeSet author="philip" id="9">
+        <comment>default vendor_sub_id to 0</comment>
+        <sql>
+            <![CDATA[
+                    update ftp_downloads set vendor_sub_id = 0 where vendor_sub_id is null;
+                    update ftp_uploads set vendor_sub_id = 0 where vendor_sub_id is null;
+                    alter table ftp_downloads modify column vendor_sub_id int(11) NOT NULL default 0;
+                    alter table ftp_uploads modify column vendor_sub_id int(11) NOT NULL default 0;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="10" context="local, staging">
+        <comment>staging and local ftp credentials</comment>
+        <sql>
+            <![CDATA[
+                    truncate ftp_servers;
+                    truncate ftp_downloads;
+                    truncate ftp_uploads;
+                    alter table ftp_servers drop column vendor_acct;
+                    insert into ftp_servers values (1, 'reports.sandbox.paypal.com', 22, 'sftp4W_paypal10zynga.com', 'zynga.365', 'sftp');
+                    insert into ftp_downloads values (1, 1, 13, 0, 'ppreports/outgoing', '/zynga/data/downloads/paypalexpress', 0, 0, now(), 1);
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="cschaefer" id="11" >
+        <comment>adding column to zpay_checks to control visibility of alert results</comment>
+        <sql>
+            <![CDATA[
+			    ALTER TABLE zpay_checks ADD COLUMN revsensitive tinyint(4) NOT NULL DEFAULT 1;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="11">
+        <comment>add incomm cad packages</comment>
+        <loadData tableName="packages" file="sar/2010/Q2/data/incomm_sprint04.csv">
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="upc" type="STRING" />
+            <column name="game_id" type="NUMERIC" />
+            <column name="description" type="STRING" />
+            <column name="amount" type="NUMERIC" />
+            <column name="currency" type="STRING" />
+            <column name="points" type="NUMERIC" />
+            <column name="cur_code_real" type="STRING" />
+            <column name="type" type="NUMERIC" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="philip" id="12">
+        <comment>add incomm cad package attributes</comment>
+        <loadData tableName="package_attributes" file="sar/2010/Q2/data/incomm_attributes_sprint04.csv">
+            <column name="game_id" type="NUMERIC" />
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="name" type="STRING" />
+            <column name="value" type="STRING" />
+            <column name="status" type="STRING" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="wilson" id="17">
+        <comment>fix name of column</comment>
+        <sql>alter table incentives change column editted_on edited_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;</sql>
+    </changeSet>
+
+    <changeSet author="philip" id="13">
+        <comment>add incomm mafia wars gbp packages</comment>
+        <loadData tableName="packages" file="sar/2010/Q2/data/incomm_sprint04a.csv">
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="upc" type="STRING" />
+            <column name="game_id" type="NUMERIC" />
+            <column name="description" type="STRING" />
+            <column name="amount" type="NUMERIC" />
+            <column name="currency" type="STRING" />
+            <column name="points" type="NUMERIC" />
+            <column name="cur_code_real" type="STRING" />
+            <column name="type" type="NUMERIC" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="philip" id="14">
+        <comment>add incomm mafia wars gbp package attributes</comment>
+        <loadData tableName="package_attributes" file="sar/2010/Q2/data/incomm_attributes_sprint04a.csv">
+            <column name="game_id" type="NUMERIC" />
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="name" type="STRING" />
+            <column name="value" type="STRING" />
+            <column name="status" type="STRING" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="wilson" id="18">
+        <comment>adding packages for fish</comment>
+        <sql>
+            <![CDATA[
+insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, large_image_url, set_id) values (66, 9, '7,500 Coins for $5.00 USD', 'coins_image', 5.00, 1, 7500, 'Coins', '/images/popup/66/fbc_coins.png', 202);
+insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, large_image_url, set_id) values (66, 10, '15,800 Coins for $10.00 USD', 'coins_image', 10.00, 1, 15800, 'Coins', '/images/popup/66/fbc_coins.png', 202);
+insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, large_image_url, set_id) values (66, 11, '33,300 Coins for $20.00 USD', 'coins_image', 20.00, 1, 33300, 'Coins', '/images/popup/66/fbc_coins.png', 202);
+insert into packages (game_id, pkg_id, description, desc2, img_classname, amount, type, points, currency, large_image_url, set_id) values (66, 12, '70,600 Coins for $40.00 USD', 'Best Value!', 'coins_image', 40.00, 1, 70600, 'Coins', '/images/popup/66/fbc_coins.png', 202);
+
+insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, large_image_url, set_id) values (66, 13, '25 Sand Dollars for $5.00 USD', 'cash_image', 5.00, 1, 25, 'Sand Dollars', '/images/popup/66/fbc_cash.png', 202);
+insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, large_image_url, set_id) values (66, 14, '55 Sand Dollars for $10.00 USD', 'cash_image', 10.00, 1, 55, 'Sand Dollars', '/images/popup/66/fbc_cash.png', 202);
+insert into packages (game_id, pkg_id, description, img_classname, amount, type, points, currency, large_image_url, set_id, is_default) values (66, 15, '115 Sand Dollars for $20.00 USD', 'cash_image', 20.00, 1, 115, 'Sand Dollars', '/images/popup/66/fbc_cash.png', 202, 1);
+insert into packages (game_id, pkg_id, description, desc2, img_classname, amount, type, points, currency, large_image_url, set_id) values (66, 16, '240 Sand Dollars for $40.00 USD', 'Best Value!', 'cash_image', 40.00, 1, 240, 'Sand Dollars', '/images/popup/66/fbc_cash.png', 202);
+
+insert into discounts (game_id, discount_package_type, discount_package_key, discount, retailer, currency_code, country_code) values (66, 'PACKAGE_ID', 13, 0.1000, 'ZYNGA', '[a-zA-Z]+', '[a-zA-Z]+');
+insert into discounts (game_id, discount_package_type, discount_package_key, discount, retailer, currency_code, country_code) values (66, 'PACKAGE_ID', 14, 0.1000, 'ZYNGA', '[a-zA-Z]+', '[a-zA-Z]+');
+insert into discounts (game_id, discount_package_type, discount_package_key, discount, retailer, currency_code, country_code) values (66, 'PACKAGE_ID', 15, 0.2000, 'ZYNGA', '[a-zA-Z]+', '[a-zA-Z]+');
+insert into discounts (game_id, discount_package_type, discount_package_key, discount, retailer, currency_code, country_code) values (66, 'PACKAGE_ID', 16, 0.2000, 'ZYNGA', '[a-zA-Z]+', '[a-zA-Z]+');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="19">
+        <comment>incomm canada ftp setup</comment>
+        <sql>
+            insert into ftp_uploads (id, ftp_server_id, vendor_acct, vendor_sub_id, remote_dir, active) values (22, 5, 14, 1, "Incomm/incomm_ca", 1);
+            insert into ftp_uploads (id, ftp_server_id, vendor_acct, vendor_sub_id, remote_dir, active, upload_source) values (23, 5, 14, 0, "Reporting", 1, 2);
+            insert into ftp_downloads (id, ftp_server_id, vendor_acct, vendor_sub_id, remote_dir, local_dir, active) values (6, 4, 14, 1, 'Canada', '/zynga/data/downloads/incomm.1', 1);
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="15">
+        <comment>add key to db_lock domain_key</comment>
+        <sql>alter table db_lock add index (`domain_key`)</sql>
+    </changeSet>
+
+    <changeSet author="philip" id="16">
+        <comment>remove db_lock_index</comment>
+        <sql>alter table db_lock drop index `db_lock_index`</sql>
+    </changeSet>
+
+    <changeSet author="philip" id="17">
+        <comment>add vendor_sub_id to ledger_exceptions</comment>
+        <sql>
+            alter table ledger_exceptions add column vendor_sub_id int(11) not null default 0 after vendor_id;
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="18">
+        <comment>ledger_exception_queue table</comment>
+        <sql>
+            <![CDATA[
+                CREATE TABLE `ledger_exception_queue` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `name` varchar(128) DEFAULT NULL,
+                `vendor_acct` int(11) NOT NULL,
+                `vendor_sub_id` int(11) NOT NULL DEFAULT '0',
+                `modified_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+                `processed` int(11) DEFAULT '0',
+                `attempts` int(11) DEFAULT '0',
+                `file_name` varchar(128) DEFAULT NULL,
+                `line` int(11) NOT NULL,
+                `data` varchar(1024) DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `le_queue_vendor_id_sub_id` (`vendor_acct`,`vendor_sub_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="19">
+        <comment>remove retry_queue_entry</comment>
+        <sql>
+            drop table retry_queue_entry;
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="20">
+        <comment>remove vendor_sub_id to ledger_exceptions</comment>
+        <sql>
+            alter table ledger_exceptions drop column vendor_sub_id;
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="20">
+        <comment>new petville packages</comment>
+        <sql>
+            <![CDATA[
+insert into packages (game_id, pkg_id, set_id, description, img_classname, large_image_url, amount, points, currency, active, type) values (64, 49, 129, '380,000 Coins ($100)', 'coins_image', '/images/popup/64/coins_fbc.png', 100.00, 380000, 'Coins', 'y', 1);
+insert into packages (game_id, pkg_id, set_id, description, img_classname, large_image_url, amount, points, currency, active, type) values (64, 50, 129, '620,000 Coins ($150)', 'coins_image', '/images/popup/64/coins_fbc.png', 150.00, 620000, 'Coins', 'y', 1);
+insert into packages (game_id, pkg_id, set_id, description, img_classname, large_image_url, amount, points, currency, active, type) values (64, 51, 129, '1,600 PetCash ($100)', 'cash_image', '/images/popup/64/cash_fbc.png', 100.00, 1600, 'PetCash', 'y', 1);
+insert into packages (game_id, pkg_id, set_id, description, img_classname, large_image_url, amount, points, currency, active, type) values (64, 52, 129, '2,400 PetCash ($150)', 'cash_image', '/images/popup/64/cash_fbc.png', 150.00, 2400, 'PetCash', 'y', 1);
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="21">
+        <comment>creating new incentive and disabling the old one</comment>
+        <sql>
+            <![CDATA[
+                    update incentives set active=0 where id=1;
+                    insert into incentives (id, game_id, amount, currency, grant_category, grant_code) values (4, 43, 25, 'Reward Points', 2, 1);
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="21">
+        <comment>add vendor_sub_id to incomm_daily_sale</comment>
+        <sql>
+            alter table incomm_daily_sale add column vendor_sub_id int(11) not null default 0;
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="22">
+        <comment>new treasure packages</comment>
+        <sql>
+            <![CDATA[
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,28,203,0, '25 Island Cash ($5.00)', '', 'cash_image', 5, 25, 'Island Cash', '/images/popup/69/fbc_cash.png');
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,29,203,0, '55 Island Cash ($10.00)', '', 'cash_image', 10, 55, 'Island Cash', '/images/popup/69/fbc_cash.png');
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,30,203,0, '115 Island Cash ($20.00)', '', 'cash_image', 20, 115, 'Island Cash', '/images/popup/69/fbc_cash.png');
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,31,203,1, '310 Island Cash ($50.00)', 'Best Value!', 'cash_image', 50, 310, 'Island Cash', '/images/popup/69/fbc_cash.png');
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,32,203,0, '7,500 Coins ($5.00)', '', 'coins_image', 5, 7500, 'Coins', '/images/popup/69/fbc_coins.png');
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,33,203,0, '16,000 Coins ($10.00)', '', 'coins_image', 10, 16000, 'Coins', '/images/popup/69/fbc_coins.png');
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,34,203,0, '33,000 Coins ($20.00)', '', 'coins_image', 20, 33000, 'Coins', '/images/popup/69/fbc_coins.png');
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url) values (69,35,203,0, '90,000 Coins ($50.00)', 'Best Value!', 'coins_image', 50, 90000, 'Coins', '/images/popup/69/fbc_coins.png');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="23">
+        <comment>adding default package to mafia set 200</comment>
+        <sql>update packages set is_default=1 where game_id=43 and pkg_id=648;</sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="24">
+        <comment></comment>
+        <sql>
+            <![CDATA[
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,69,204,0, '25 Cafe Cash ($5.00)', '', 'cash_image', 5, 25, 'Cafe Cash', '/images/popup/61/fbc_cash.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,70,204,0, '55 Cafe Cash ($10.00)', '', 'cash_image', 10, 55, 'Cafe Cash', '/images/popup/61/fbc_cash.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,71,204,0, '120 Cafe Cash ($20.00)', '', 'cash_image', 20, 120, 'Cafe Cash', '/images/popup/61/fbc_cash.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,72,204,1, '350 Cafe Cash ($50.00)', '', 'cash_image', 50, 350, 'Cafe Cash', '/images/popup/61/fbc_cash.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,73,204,0, '780 Cafe Cash ($100.00)', '', 'cash_image', 100, 780, 'Cafe Cash', '/images/popup/61/fbc_cash.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,74,204,0, '1,250 Cafe Cash ($150.00)', 'Best Value!', 'cash_image', 150, 1250, 'Cafe Cash', '/images/popup/61/fbc_cash.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,75,204,0, '15,280 Cafe Coins ($5.00)', '', 'coins_image', 5, 15280, 'Cafe Coins', '/images/popup/61/fbc_coins.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,76,204,0, '45,240 Cafe Coins ($10.00)', '', 'coins_image', 10, 45240, 'Cafe Coins', '/images/popup/61/fbc_coins.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,77,204,0, '125,280 Cafe Coins ($20.00)', '', 'coins_image', 20, 125280, 'Cafe Coins', '/images/popup/61/fbc_coins.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,78,204,0, '350,000 Cafe Coins ($50.00)', '', 'coins_image', 50, 350000, 'Cafe Coins', '/images/popup/61/fbc_coins.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,79,204,0, '770,000 Cafe Coins ($100.00)', '', 'coins_image', 100, 770000, 'Cafe Coins', '/images/popup/61/fbc_coins.png', 1);
+insert into packages (game_id, pkg_id, set_id, is_default, description, desc2, img_classname, amount, points, currency, large_image_url, type) values (61,80,204,0, '1,200,000 Cafe Coins ($150.00)', 'Best Value!', 'coins_image', 150, 1200000, 'Cafe Coins', '/images/popup/61/fbc_coins.png', 1);
+
+insert into discounts (game_id, discount_package_type, discount_package_key, discount, provider_id, retailer, currency_code, country_code) values (61, 'PACKAGE_SET_ID', 204, 0.1500, 0, 'ZYNGA', '[a-zA-Z]+', '[a-zA-Z]+');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="22">
+        <comment>add incomm packages</comment>
+        <loadData tableName="packages" file="sar/2010/Q2/data/incomm_sprint04b.csv">
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="upc" type="STRING" />
+            <column name="game_id" type="NUMERIC" />
+            <column name="description" type="STRING" />
+            <column name="amount" type="NUMERIC" />
+            <column name="currency" type="STRING" />
+            <column name="points" type="NUMERIC" />
+            <column name="cur_code_real" type="STRING" />
+            <column name="type" type="NUMERIC" />
+            <column name="is_default" type="NUMERIC" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="philip" id="23">
+        <comment>add incomm package attributes</comment>
+        <loadData tableName="package_attributes" file="sar/2010/Q2/data/incomm_attributes_sprint04b.csv">
+            <column name="game_id" type="NUMERIC" />
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="name" type="STRING" />
+            <column name="value" type="STRING" />
+            <column name="status" type="STRING" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="philip" id="24">
+        <comment>set default package</comment>
+        <sql>
+            update packages set is_default = 1 where game_id = 61 and pkg_id = 67;
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="25" context="local, staging">
+        <comment>creating game entry for pet for sn_id=18</comment>
+        <sql>
+            <![CDATA[
+                insert into games (game_id, sn_id, name, short_name, zappkey, callback_url, return_url, ptech_merchant_id, soft_desc)
+                values (64, 18, 'PetVille', 'petville', 'XjN+0PCQFbnA2qFVm81wm8tne7cISj1sEmHQuA/+8YI=', 'http://dev02.petville.zynga.com/pets_z_dev_com/zbill_cb.php', 'http://site.zynga.com/petville_dev', '020372', 'PetVille ZL');
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="26" context="production">
+        <comment>creating game entry for pet for sn_id=18</comment>
+        <sql>
+            <![CDATA[
+                insert into games (game_id, sn_id, name, short_name, zappkey, callback_url, return_url, ptech_merchant_id, soft_desc)
+                values (64, 18, 'PetVille', 'petville', 'XjN+0PCQFbnA2qFVm81wm8tne7cISj1sEmHQuA/+8YI=', 'http://zlive-0.petville.zynga.com/current/zbill_cb.php', 'http://site.zynga.com/petville', '020372', 'PetVille ZL');
+            ]]>
+        </sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="51">
+    	<comment>Fixed PAY-2497 Green Giant promo, 1 farm cash only! cheapy.</comment>
+    	<sql>
+	    	<![CDATA[
+	    		update packages set points = 5 where game_id = 63 and pkg_id = 124;
+	    	]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="52">
+    	<sql>
+    		<![CDATA[
+    			update promotion set promotion_ended = '2010-12-16 00:00:00' where promotion_name = 'GREEN_GIANT_PROMO';
+    			update promotion set promotion_ended = '2011-01-01 00:00:00' where promotion_name = 'SEVEN_ELEVEN_PROMO';
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="wilson" id="27">
+        <comment>add amount_usd to incomm_daily_sale table</comment>
+        <sql>alter table incomm_daily_sale add column card_amount_usd decimal(10,4) after card_amount;</sql>
+    </changeSet>
+
+    <changeSet author="philip" id="25">
+        <comment>PAY2525, poker packages</comment>
+        <sql>
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1056,'1,250,000 Chips for $5', '', '',5,1250000,'Chips','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1057,'2,500,000 Chips for $10', '', '',10,2500000,'Chips','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1058,'6,500,000 Chips for $20', '', '',20,6500000,'Chips','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1059,'20,000,000 Chips for $50', '', '',50,20000000,'Chips','',1);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1060,'100,000,000 Chips for $150', '', '',150,100000000,'Chips','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1061,'200,000,000 Chips for $250', '', '',250,200000000,'Chips','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1062,'25 Casino Gold for $5', '', 'gold_img',5,25,'Casino Gold','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1063,'50 Casino Gold for $10', '', 'gold_img',10,50,'Casino Gold','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1064,'130 Casino Gold for $20', '', 'gold_img',20,130,'Casino Gold','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1065,'330 Casino Gold for $50', '', 'gold_img',50,330,'Casino Gold','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1066,'830 Casino Gold for $100', '', 'gold_img',100,830,'Casino Gold','',0);
+            insert into packages (game_id, type, set_id, pkg_id, description, desc2, img_classname, amount, points, currency, large_image_url, is_default) values (1, 1, 205,1067,'1,660 Casino Gold for $150', '', 'gold_img',150,1660,'Casino Gold','',0);
+        </sql>
+    </changeSet>
+    <changeSet author="philip" id="26">
+        <comment>default incomm package for yo</comment>
+        <sql>
+            update packages set is_default = 1 where game_id = 45 and pkg_id = 531;             
+        </sql>
+    </changeSet>
+
+	<changeSet author="mcheung" id="53" context="production">
+		<comment>Update yoville callback</comment>
+		<sql>
+			<![CDATA[
+				update games set grantgoods_callback_url = 'http://app2.yoville.com/cb/callback.php' where game_id = 45;
+			]]>
+		</sql>
+	</changeSet>
+
+    <changeSet author="philip" id="27">
+        <comment>add incomm packages</comment>
+        <loadData tableName="packages" file="sar/2010/Q2/data/incomm_sprint04c.csv">
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="upc" type="STRING" />
+            <column name="game_id" type="NUMERIC" />
+            <column name="description" type="STRING" />
+            <column name="amount" type="NUMERIC" />
+            <column name="currency" type="STRING" />
+            <column name="points" type="NUMERIC" />
+            <column name="cur_code_real" type="STRING" />
+            <column name="type" type="NUMERIC" />
+            <column name="is_default" type="NUMERIC" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="philip" id="28">
+        <comment>add incomm package attributes</comment>
+        <loadData tableName="package_attributes" file="sar/2010/Q2/data/incomm_attributes_sprint04c.csv">
+            <column name="game_id" type="NUMERIC" />
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="name" type="STRING" />
+            <column name="value" type="STRING" />
+            <column name="status" type="STRING" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="wilson" id="28" context="local, staging">
+        <comment>update games with grantgoods_callback_url for petville</comment>
+        <sql>update games set grantgoods_callback_url='http://dev02.petville.zynga.com/pets_z_dev_com/zplatform_callback.php' where game_id=64 and sn_id=18;</sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="29" context="production">
+        <comment>update games with grantgoods_callback_url for petville</comment>
+        <sql>update games set grantgoods_callback_url='http://zlive-0.petville.zynga.com/current/zplatform_callback.php' where game_id=64 and sn_id=18;</sql>
+    </changeSet>
+
+    <changeSet author="mcheung" id="54">
+    	<comment>by pass fraud for seven eleven</comment>
+    	<sql>
+    		<![CDATA[
+    			insert into vendor_attributes (vendor_id, name, value) value (17, 'bypass_fraud', 'true');
+    			insert into vendor_attributes (vendor_id, name, value) value (18, 'bypass_fraud', 'true');
+    		]]>
+    	</sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="30" context="local, staging">
+        <comment>adding ftp server for incomm on local environments</comment>
+        <sql>insert into ftp_servers (id, host, port, username, password, protocol) values (4, 'ftp.incomm.com', 22, 'Zynga', 'n6SPaswa', 'sftp');</sql>
+    </changeSet>
+
+    <changeSet author="wilson" id="31" context="local, staging">
+        <comment>update staging remote_dir for ftp_downloads for incomm</comment>
+        <sql>update ftp_downloads set remote_dir = 'Canada/Test' where id = 6;</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="55">
+    	<comment>fixed seven eleven gift card grants</comment>
+    	<sql>
+    		<![CDATA[
+    			insert into packages (game_id, pkg_id, description, amount, type, points, currency, active, grant_category, grant_code, grant_quantity) 
+    				values (63, 151, "10 Fuel", 0, 10, 0, "Farm Cash", "y", 0, 18287, 1);
+    			
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 151, 'PROMOTION_ITEM_CODE', 'SEVEN_ELEVEN_PROMO', 'ACTIVE');
+    			insert into package_attributes (game_id, pkg_id, name, value, status) values (63, 151, 'PROMOTION_ITEM_ID', 'SEVEN_ELEVEN_GAMECARD_63', 'ACTIVE');
+    			
+    			insert into promotion_rule_map (promotion_id, promotion_rule_id)
+					select p.id, rule.id from promotion p, promotion_rule rule where p.promotion_name = 'SEVEN_ELEVEN_PROMO' and p.vendor_id = 14 and rule.rule_name = 'SEVEN_ELEVEN_MULTI_GRANT';
+				
+    			update package_attributes set value = 'SEVEN_ELEVEN_GAMECARD_43' where game_id = 43 and pkg_id = 661 and name = 'PROMOTION_ITEM_ID';
+    			update package_attributes set value = 'SEVEN_ELEVEN_GAMECARD_45' where game_id = 45 and pkg_id = 516 and name = 'PROMOTION_ITEM_ID';
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="56">
+    	<comment>fix farm fuel package</comment>
+    	<sql>
+    		<![CDATA[
+    			update packages set type = 1, points = 10 where game_id = 63 and pkg_id = 151;
+    		]]>
+    	</sql>
+    </changeSet>
+    
+    <changeSet author="mcheung" id="57">
+    	<sql>
+    		<![CDATA[
+    			update packages set points = 1 where game_id = 63 and pkg_id = 151;
+    		]]>
+    	</sql>
+    </changeSet>
+
+    <changeSet author="philip" id="29">
+        <comment>updating package description</comment>
+        <sql>
+            <![CDATA[
+                    update packages set description = '42,500 FarmVille Coins ($25.00 CAD)' where game_id = 63 and pkg_id = 146;
+            ]]>
+        </sql>
+    </changeSet>
+    
+    <changeSet author="cchen" id="20">
+        <comment>poker promo stuff</comment>
+        <loadData tableName="package_attributes" file="sar/2010/Q2/data/poker_promo_attributes_sprint04a.csv">
+            <column name="game_id" type="NUMERIC" />
+            <column name="pkg_id" type="NUMERIC" />
+            <column name="name" type="STRING" />
+            <column name="value" type="STRING" />
+            <column name="status" type="STRING" />
+        </loadData>
+    </changeSet>
+
+    <changeSet author="philip" id="30">
+        <comment>default package for package_set 182</comment>
+        <sql>
+            <![CDATA[
+                update packages set is_default = 1 where game_id = 43 and pkg_id = 552;       
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="31">
+        <comment>updating package descriptions</comment>
+        <sql>
+            <![CDATA[
+                update packages set description = '42,223 Coins for $25.00 USD' where game_id = 66 and pkg_id = 22;
+                update packages set description = '145 Sand Dollars for $25.00 USD' where game_id = 66 and pkg_id = 21;
+                update packages set description = '110 YoCash ($20.00 USD)' where game_id = 45 and pkg_id = 531;
+                update packages set description = '10,000 YoCoins ($20.00 USD)' where game_id = 45 and pkg_id = 532;
+                update packages set description = '42,500 FarmVille Coins ($25.00 USD)' where game_id = 63 and pkg_id = 150;
+                update packages set description = '115 Sand Dollars for $20.00 USD' where game_id = 66 and pkg_id = 17;
+                update packages set description = '33,300 Coins for $20.00 USD' where game_id = 66 and pkg_id = 18;
+                update packages set description = '55 Sand Dollars for $10.00 USD' where game_id = 66 and pkg_id = 19;
+                update packages set description = '15,800 Coins for $10.00 USD' where game_id = 66 and pkg_id = 20;
+                update packages set description = '42 reward points for $10.00' where game_id = 43 and pkg_id = 667;
+                update packages set description = '16,000 Island Coins ($10.00)' where game_id = 69 and pkg_id = 43;
+                update packages set description = '110 YoCash ($20.00 USD)' where game_id = 45 and pkg_id = 531;
+                update packages set description = '10,000 YoCoins ($20.00 USD)' where game_id = 45 and pkg_id = 532;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="32">
+        <comment>disable set 187 for now</comment>
+        <sql>
+            update packages set active = 'n' where game_id = 1 and set_id = 187;
+        </sql>
+    </changeSet>
+
+    <changeSet author="philip" id="33">
+        <comment>ftp upload entry for ipn reports</comment>
+        <sql>
+            insert into ftp_uploads (id, ftp_server_id, vendor_acct, vendor_sub_id, remote_dir, active, upload_source) values (24, 5, 3, 0, 'Reporting', 1, 2);
+        </sql>
+    </changeSet>
+</databaseChangeLog>
