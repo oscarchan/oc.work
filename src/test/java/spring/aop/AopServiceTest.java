@@ -1,10 +1,13 @@
 package spring.aop;
 
+import javax.ws.rs.PathParam;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,14 +29,90 @@ public class AopServiceTest
 	@Qualifier("txMethodService")
 	ServiceObjects.TxMethodService txMethodService;
 	
-	@Test
+	@Autowired
+	@Qualifier("restMemberService")
+	ServiceObjects.RestMemberService restService;
+	
+	@Transactional
 	public void testTxMethod()
 	{
 		txMethodService.getReadOnly();
 		txMethodService.getTransactional();
 	}
 	
+	@Test
+	public void testRest()
+	{
+		restService.getMember(233);
+		restService.getMemberFriend(123, 456);
+	}
 	
+	@Aspect
+	public static class RestLogAspect
+	{
+		@Pointcut("within(spring.beans.ServiceObjects)")
+		public void classWithServiceObjects() { }
+		
+		@Pointcut("execution (@javax.ws.rs.GET * *(..) )")
+		public void methodGet() { }
+		
+		@Pointcut("execution (* *(.., @javax.ws.rs.PathParam (*),..) ) ")
+		public void methodWithPathParam() { }
+		
+//		@Pointcut("execution (* *(*)) && args(.., id,.. )")
+//		public void methodWithLongPathParam(Long id) { }
+		
+		@Around("classWithServiceObjects() && methodGet() && methodWithPathParam()") 
+		public void logRestMethod(ProceedingJoinPoint jp) throws Throwable
+		{
+			mLog.info("class & method: " + jp.getSignature().toLongString() );
+			
+			jp.proceed();
+		}
+		
+		@Around("classWithServiceObjects()") 
+		public void logRestMethod_class(ProceedingJoinPoint jp) throws Throwable
+		{
+			mLog.info("class: " + jp.getSignature().toLongString() );
+			
+			jp.proceed();
+		}
+		
+		@Around("methodGet()") 
+		public void logRestMethod_method(ProceedingJoinPoint jp) throws Throwable
+		{
+			mLog.info("method: " + jp.getSignature().toLongString() );
+			jp.proceed();
+		}
+		
+		@Around("methodWithPathParam()") 
+		public void logRestMethod_param(ProceedingJoinPoint jp) throws Throwable
+		{
+			mLog.info("param: " + jp.getSignature().toLongString() );
+			jp.proceed();
+		}
+
+		/**
+		 * match exactly one long parameter 
+		 */
+		@Around("methodWithPathParam() && args(id) ") 
+		public void logRestMethod_paramOneValue(ProceedingJoinPoint jp, long id) throws Throwable
+		{
+			mLog.info("param one: " + jp.getSignature().toLongString() + ": id=" + id);
+			jp.proceed();
+		}
+
+		/**
+		 * match first one PathParam parameter
+		 */
+		@Around("classWithServiceObjects() && execution (* *(..)) &&  args ( @javax.ws.rs.PathParam (id), ..)") 
+		public void logRestMethod_paramFirstValue(ProceedingJoinPoint jp, Long id) throws Throwable
+		{
+			mLog.info("param 1st: " + jp.getSignature().toLongString() + ": id=" + id);
+			jp.proceed();
+		}
+				
+	}
 	@Aspect
 	public static class TransactionalLogAspect
 	{

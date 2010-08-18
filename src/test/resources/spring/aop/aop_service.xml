@@ -11,8 +11,11 @@
     <bean id="txMethodService" class="spring.beans.ServiceObjects$TxMethodService" />
     <bean id="txClassService" class="spring.beans.ServiceObjects$TxClassService" />
 
+    <bean id="restMemberService" class="spring.beans.ServiceObjects$RestMemberService" />
+
     <!-- advices -->
     <bean id="txLogAspect" class="spring.aop.AopServiceTest$TransactionalLogAspect" />
+    <bean id="restLogAspect" class="spring.aop.AopServiceTest$RestLogAspect" />
     
     <aop:aspectj-autoproxy />
 </beans>
