@@ -36,10 +36,13 @@ public class ReflectionUtils
 		
 		Annotation[][] paramAnnotations = method.getParameterAnnotations();
 		
+		if(paramAnnotations.length==0)
+			return -1;
+		
 		if(fromIndex>=paramAnnotations.length)
 			throw new IllegalArgumentException("invalid fromIndex: " + fromIndex);
 		
-		for(int argIndex=fromIndex;argIndex<paramAnnotations.length;fromIndex++) {
+		for(int argIndex=fromIndex;argIndex<paramAnnotations.length;argIndex++) {
 			Annotation[] paramMarkers= paramAnnotations[argIndex];
 			
 			for (Annotation paramMarker : paramMarkers) {

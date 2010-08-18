@@ -26,6 +26,13 @@ public class ServiceObjects
 			return String.valueOf(fid);
 		}
 		
+		@GET
+		@Path("/members/{id}/messages/{mid}")
+		public String getMemberMessage(@PathParam("id") long id, @PathParam("fid") long mid)
+		{
+			return String.valueOf(mid);
+		}
+		
 		
 	}
 	/**
