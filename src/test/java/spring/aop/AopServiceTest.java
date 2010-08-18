@@ -1,14 +1,21 @@
 package spring.aop;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
+
 import javax.ws.rs.PathParam;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +23,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import spring.beans.ServiceObjects;
 
@@ -59,8 +68,17 @@ public class AopServiceTest
 		@Pointcut("execution (* *(.., @javax.ws.rs.PathParam (*),..) ) ")
 		public void methodWithPathParam() { }
 		
-//		@Pointcut("execution (* *(*)) && args(.., id,.. )")
-//		public void methodWithLongPathParam(Long id) { }
+		/**
+		 * name binding to parameter only works in 'target', 'this', and 'args' keywords 
+		 */
+		// @Pointcut("execution (* *(.., @javax.ws.rs.PathParam (id),..) ) ")
+		// public void methodWithPathParam_test(long id ) { }
+				
+		/**
+		 * args (.., @javax.ws.rs.PathParam (id), ..) does not work
+		 */
+		@Pointcut("execution (* *(..)) && args ( @javax.ws.rs.PathParam (id), ..)")
+		public void methodWithFirstPathParam(long id) { }
 		
 		@Around("classWithServiceObjects() && methodGet() && methodWithPathParam()") 
 		public void logRestMethod(ProceedingJoinPoint jp) throws Throwable
@@ -105,13 +123,44 @@ public class AopServiceTest
 		/**
 		 * match first one PathParam parameter
 		 */
-		@Around("classWithServiceObjects() && execution (* *(..)) &&  args ( @javax.ws.rs.PathParam (id), ..)") 
-		public void logRestMethod_paramFirstValue(ProceedingJoinPoint jp, Long id) throws Throwable
+		@Around("classWithServiceObjects() && methodWithFirstPathParam(id)") 
+		public void logRestMethod_paramFirstValue(ProceedingJoinPoint jp, long id) throws Throwable
 		{
 			mLog.info("param 1st: " + jp.getSignature().toLongString() + ": id=" + id);
 			jp.proceed();
 		}
+		
+		@Around("classWithServiceObjects() && methodWithPathParam()") 
+		public void logRestMethod_paramAnyValue(ProceedingJoinPoint jp) throws Throwable
+		{
+			MethodSignature signature = (MethodSignature) jp.getSignature();
+
+			Method method = signature.getMethod();
+			
+			Object[] args = jp.getArgs();
+			Annotation[][] argsAnnos = method.getParameterAnnotations();
+
+			Long id = null;
+			
+			for(int i=0;i<args.length;i++) {
+				Object arg = args[i];
+				Annotation[] argAnno = argsAnnos[i];
 				
+				for (Annotation annotation : argAnno) {
+					Class<? extends Annotation> annType = annotation.getClass();
+					
+	                if(PathParam.class.isAssignableFrom(annType)) {
+	                	if(arg instanceof Long)
+	                		id = (Long) arg;
+	                	else
+	                		mLog.warn("invalid PathParam: class" + arg.getClass() + ": value=" + arg);
+	                }
+                }
+			}				
+
+			mLog.info("param any: " + jp.getSignature().toLongString() + ": id=" + id);
+			jp.proceed();
+		}				
 	}
 	@Aspect
 	public static class TransactionalLogAspect

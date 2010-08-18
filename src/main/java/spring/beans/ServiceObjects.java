@@ -3,6 +3,7 @@ package spring.beans;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ public class ServiceObjects
 		
 		@GET
 		@Path("/members/{id}/friends/{fid}")
-		public String getMemberFriend(@PathParam("id") long id, @PathParam("id") long fid)
+		public String getMemberFriend(@PathParam("id") long id, @QueryParam("fid") long fid)
 		{
 			return String.valueOf(fid);
 		}
