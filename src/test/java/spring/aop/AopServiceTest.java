@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 
+import javassist.tools.reflect.Reflection;
+
 import javax.ws.rs.PathParam;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import common.ReflectionUtils;
 
 import spring.beans.ServiceObjects;
 
@@ -137,28 +140,16 @@ public class AopServiceTest
 
 			Method method = signature.getMethod();
 			
-			Object[] args = jp.getArgs();
-			Annotation[][] argsAnnos = method.getParameterAnnotations();
-
-			Long id = null;
+			int argIndex = ReflectionUtils.indexOfAnnotatedParameter(method, PathParam.class);
 			
-			for(int i=0;i<args.length;i++) {
-				Object arg = args[i];
-				Annotation[] argAnno = argsAnnos[i];
-				
-				for (Annotation annotation : argAnno) {
-					Class<? extends Annotation> annType = annotation.getClass();
-					
-	                if(PathParam.class.isAssignableFrom(annType)) {
-	                	if(arg instanceof Long)
-	                		id = (Long) arg;
-	                	else
-	                		mLog.warn("invalid PathParam: class" + arg.getClass() + ": value=" + arg);
-	                }
-                }
-			}				
+			if(argIndex>=0) {
 
-			mLog.info("param any: " + jp.getSignature().toLongString() + ": id=" + id);
+				Object[] args = jp.getArgs();
+				
+				mLog.info("param any: " + jp.getSignature().toLongString() + ": id=" + args[argIndex]);
+
+			}
+
 			jp.proceed();
 		}				
 	}
