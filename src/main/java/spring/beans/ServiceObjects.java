@@ -4,6 +4,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,10 @@ public class ServiceObjects
 			return String.valueOf(mid);
 		}
 		
+		public String throwException(WebApplicationException e) throws WebApplicationException
+		{
+			throw e;
+		}
 		
 	}
 	/**

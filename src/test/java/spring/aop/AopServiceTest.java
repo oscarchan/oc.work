@@ -8,11 +8,15 @@ import java.util.Arrays;
 import javassist.tools.reflect.Reflection;
 
 import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -26,7 +30,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 import common.ReflectionUtils;
 
 import spring.beans.ServiceObjects;
@@ -57,7 +60,13 @@ public class AopServiceTest
 	{
 		restService.getMember(233);
 		restService.getMemberFriend(123, 456);
+		
+		try {  restService.throwException(new WebApplicationException(Response.Status.NOT_FOUND)); } catch (WebApplicationException e) { }
+		try {  restService.throwException(new WebApplicationException(Response.Status.BAD_REQUEST)); } catch (WebApplicationException e) { }
+		try {  restService.throwException(new CustomWebApplicationException()); } catch (WebApplicationException e) { }
 	}
+	
+	static class CustomWebApplicationException extends WebApplicationException { private static final long serialVersionUID = 1L; }
 	
 	@Aspect
 	public static class RestLogAspect
@@ -82,6 +91,17 @@ public class AopServiceTest
 		 */
 		@Pointcut("execution (* *(..)) && args ( @javax.ws.rs.PathParam (id), ..)")
 		public void methodWithFirstPathParam(long id) { }
+		
+		
+		@AfterThrowing(value="classWithServiceObjects()", throwing="e")
+		public void logException(JoinPoint jp, WebApplicationException e) throws Throwable
+		{
+			if(Response.Status.NOT_FOUND.getStatusCode()==e.getResponse().getStatus())
+				mLog.info("not found exception thrown: " + e);
+			else
+				mLog.info("unexpected exception thrown: " + e);
+				
+		}
 		
 		@Around("classWithServiceObjects() && methodGet() && methodWithPathParam()") 
 		public void logRestMethod(ProceedingJoinPoint jp) throws Throwable
