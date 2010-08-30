@@ -5,7 +5,7 @@ import java.net.URI;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 /**
- * allow us ot 
+ * Variation of HttpGet which 
  */
 public class HttpLoadedGet extends HttpEntityEnclosingRequestBase
 {

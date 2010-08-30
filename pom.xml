@@ -15,7 +15,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   </properties>
 
   <repositories>
-  
     <repository>
       <id>scala-tools.org</id>
       <name>Scala-Tools Maven2 Repository</name>
@@ -27,9 +26,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       <url>http://scala-tools.org/repo-snapshots</url>
     </repository>
     <repository>
-      <id>codehaus.snapshot</id>
+      <id>codehaussnapshot</id>
       <name>Codehaus Snapshots Repository</name>
-      <url>http://snapshots.repository.codehaus.org</url>
+      <url>https://nexus.codehaus.org/content/repositories/snapshots</url>
     </repository>
     <repository>
       <id>apache.snapshot</id>
@@ -46,7 +45,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     </pluginRepository>
     <pluginRepository>
       <id>codehaus.plugin.snapshot</id>
-      <url>http://snapshots.repository.codehaus.org</url>
+      <url>https://nexus.codehaus.org/content/repositories/snapshots</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>codehaus.plugin.releases</id>
+      <url>https://nexus.codehaus.org/content/repositories/releases</url>
     </pluginRepository>
     <pluginRepository>
       <id>apache.plugin.snapshots</id>
@@ -294,20 +297,20 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       	 <redirectTestOutputToFile>true</redirectTestOutputToFile>
       	</configuration>
       </plugin>
-      <plugin>
-      	<groupId>org.codehaus.mojo</groupId>
-      	<artifactId>tomcat-maven-plugin</artifactId>
-      	<version>1.0-SNAPSHOT</version>
-      	<configuration>
+<!--      <plugin>-->
+<!--      	<groupId>org.codehaus.mojo</groupId>-->
+<!--      	<artifactId>tomcat-maven-plugin</artifactId>-->
+<!--      	<version>1.0</version>-->
+<!--      	<configuration>-->
 <!--			<path>/platformservice</path>-->
-			<port>8000</port>
-          <systemProperties>
+<!--			<port>8000</port>-->
+<!--          <systemProperties>-->
 <!--            <com.sun.management.jmxremote.port>7777</com.sun.management.jmxremote.port>-->
 <!--		    <com.sun.management.jmxremote.ssl>false</com.sun.management.jmxremote.ssl>-->
 <!--		    <com.sun.management.jmxremote.authenticate>false</com.sun.management.jmxremote.authenticate>-->
-	      </systemProperties>			
-      	</configuration>
-      </plugin>
+<!--	      </systemProperties>			-->
+<!--      	</configuration>-->
+<!--      </plugin>-->
       <plugin>
       	<groupId>org.apache.activemq.tooling</groupId>
       	<artifactId>maven-activemq-plugin</artifactId>
