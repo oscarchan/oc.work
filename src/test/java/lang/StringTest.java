@@ -44,6 +44,25 @@ public class StringTest
 	}
 	
 	@Test
+	public void testSplit_multiChars()
+	{
+		String sample = "abc, xyz, hef";
+		
+		String[] result1 = sample.split(",");
+		String[] result2 = sample.split(", ");
+		
+		Assert.assertEquals("result 1 size", 3, result1.length);
+		Assert.assertEquals("result 1 #1", "abc", result1[0]);
+		Assert.assertEquals("result 1 #2", " xyz", result1[1]);
+		Assert.assertEquals("result 1 #3", " hef", result1[2]);
+
+		Assert.assertEquals("result 2 size", 3, result2.length);
+		Assert.assertEquals("result 2 #1", "abc", result2[0]);
+		Assert.assertEquals("result 2 #2", "xyz", result2[1]);
+		Assert.assertEquals("result 2 #3", "hef", result2[2]);
+
+	}
+	@Test
 	public void testSplit_empty()
 	{
 		String[] result = "".split("/");
