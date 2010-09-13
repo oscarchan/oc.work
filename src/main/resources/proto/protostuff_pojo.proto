@@ -1,0 +1,36 @@
+package protostuff;
+
+option optimize_for = LITE_RUNTIME;
+option java_package = "protostuff";
+option java_outer_classname = "ProtostuffPojo";
+
+message SimplePojo {
+  optional string id = 1;
+  optional string name = 2;
+}
+
+message BasicDataPojo {
+  required int32 intValue = 1;
+  required int64 longValue = 2; 
+  
+  
+  optional int32 intRef = 11;
+  optional int64 longRef = 12;
+  
+  optional string stringRef = 21;
+  optional TimeUnit enumRef = 22;
+  
+  optional BasicDataPojo child = 30;
+}
+
+enum TimeUnit {
+    NANOSECONDS = 0;
+    MICROSECONDS = 1;
+    MILLISECONDS = 2;
+    SECONDS = 3;
+    MINUTES = 4;
+    HOURS = 5;
+    DAYS = 6;
+}
+
+

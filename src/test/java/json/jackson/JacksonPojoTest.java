@@ -2,28 +2,36 @@ package json.jackson;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.annotate.JsonSubTypes;
+import org.codehaus.jackson.annotate.JsonSubTypes.Type;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.annotate.JsonTypeName;
+import org.codehaus.jackson.annotate.JsonTypeInfo.As;
+import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
 
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion.User;
+import common.BasicDataPojo;
+import common.RandomTestUtils;
 import common.SamplePojo;
 
 public class JacksonPojoTest
@@ -36,6 +44,50 @@ public class JacksonPojoTest
 	{
 		testPojo("simple-full", new SamplePojo("id-1", "name-1"));
 		testPojo("simple-partial", new SamplePojo("id-2", null));
+	}
+	
+	/**
+	 * test composite
+	 */
+	@Test
+	public void testBasicDataPojo() throws JsonGenerationException, JsonMappingException, IOException 
+	{
+		testPojo("simple-basic-pojo=full", randomBasicDataPojo(0));
+		testPojo("simple-basic-pojo=full", randomBasicDataPojo(1));
+		testPojo("simple-basic-pojo=full", randomBasicDataPojo(2));
+		testPojo("simple-basic-pojo=full", randomBasicDataPojo(4));
+		testPojo("simple-basic-pojo=full", randomBasicDataPojo(16));
+		
+	}
+
+	@Test
+	public void testPolyMorphism() throws JsonGenerationException, JsonMappingException, IOException
+	{
+		Circle circle= new Circle();
+		circle.setRadius(2);
+
+		testPojoSuper("poly-circle", circle, Shape.class);
+	}
+	
+	private BasicDataPojo randomBasicDataPojo(int childDepth)
+	{
+		if(childDepth<0)
+			return null;
+		
+		int intValue = RandomUtils.nextInt();
+		long longValue = RandomUtils.nextLong();
+		BasicDataPojo pojo = new BasicDataPojo()
+			.setIntValue(intValue)
+			.setLongValue(longValue)
+			.setByteValue((byte) RandomUtils.nextInt())
+			.setIntRef(RandomUtils.nextBoolean()?intValue:null)
+			.setLongRef(RandomUtils.nextBoolean()?longValue:null)
+			.setStringRef(RandomStringUtils.randomAlphanumeric(5))
+			.setEnumRef(RandomTestUtils.nextEnum(TimeUnit.class))
+			.setChild(randomBasicDataPojo(childDepth - 1))
+			;
+		
+		return pojo;
 	}
 
 	@Test
@@ -113,9 +165,27 @@ public class JacksonPojoTest
 		return (T) parsed;
 	}
 	
-	public <T> T testPojoCollection(String prefix, Collection<T> pojos, Class<T> pojoClass)
+	public <T> T testPojoSuper(String prefix, T pojo, Class<? super T> clazz)
+	        throws JsonGenerationException, JsonMappingException, IOException
+    {
+		ObjectMapper mapper = new ObjectMapper();
+
+		StringWriter writer = new StringWriter();
+		mapper.writeValue(writer, pojo);
+
+		log.info(prefix + ": output=" + writer);
+
+
+		Object parsed = mapper.readValue(writer.toString(), clazz);
+
+		Assert.assertEquals("pojo", pojo, parsed);
+
+		return (T) parsed;
+	}
+	
+	public <T> T testPojoCollection(String prefix, Collection<T> pojos, Class<T> pojoClass) throws JsonParseException, JsonMappingException, IOException
 	{
-		pojoClass =  new TypeReference<Map<String,User>>();
+//		pojoClass =  new TypeReference<Map<String,User>>();
 		
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -127,7 +197,7 @@ public class JacksonPojoTest
 
 		Object parsed = mapper.readValue(writer.toString(), pojos.getClass());
 
-		Assert.assertEquals("pojo", pojo, parsed);
+		Assert.assertEquals("pojo", pojos, parsed);
 
 		return (T) parsed;		
 	}
@@ -188,7 +258,185 @@ public class JacksonPojoTest
 		}
 	}
 	
+	/**
+	 *  polymorphic type handling solution 1: storing the type info as property via annotation
+	 *  
+	 *  @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+	 *  class Parent {}
+	 */
 
+	/**
+	 *  polymorphic type handling solution 2: storing the type info as property via mapper property
+	 *  
+     * mapper.enableDefaultTyping(); // defaults for defaults (see below); include as wrapper-array, non-concrete types
+     * mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_OBJECT); // all non-final types
+	 */
+	
+	/**
+	 * polymorphic type handling solution 3:
+	 * 
+	 *  @JsonTypeInfo in the super class, @JsonSubTypes and @JsonTypeName in the subclasses 
+	 */
+
+	@JsonTypeInfo(use=Id.NAME, include=As.PROPERTY, property="type")
+	@JsonSubTypes ( { 
+		@Type(value = Circle.class, name = "circle"),
+		@Type(value = Polygon.class, name = "polygon")	
+		}
+	)
+	static class Shape
+	{
+		private String name;
+
+		public String getName()
+        {
+        	return name;
+        }
+
+		public void setName(String name)
+        {
+        	this.name = name;
+        }
+
+		@Override
+        public int hashCode()
+        {
+	        final int prime = 31;
+	        int result = 1;
+	        result = prime * result + ((name == null) ? 0 : name.hashCode());
+	        return result;
+        }
+
+		@Override
+        public boolean equals(Object obj)
+        {
+	        if (this == obj)
+		        return true;
+	        if (obj == null)
+		        return false;
+	        if (getClass() != obj.getClass())
+		        return false;
+	        Shape other = (Shape) obj;
+	        if (name == null) {
+		        if (other.name != null)
+			        return false;
+	        } else if (!name.equals(other.name))
+		        return false;
+	        return true;
+        }
+		
+		@Override
+		public String toString()
+		{
+		    return ToStringBuilder.reflectionToString(this);
+		}
+	}
+	
+	@JsonTypeName("polygon")
+	static class Polygon extends Shape
+	{
+		
+		private int numEdges;
+		private int area;
+
+		public Polygon()
+        {
+			setName("polygon");
+        }
+		
+		public int getNumEdges()
+        {
+        	return numEdges;
+        }
+		public int getArea()
+        {
+        	return area;
+        }
+		public void setNumEdges(int numEdges)
+        {
+        	this.numEdges = numEdges;
+        }
+		public void setArea(int area)
+        {
+        	this.area = area;
+        }
+		@Override
+        public int hashCode()
+        {
+	        final int prime = 31;
+	        int result = super.hashCode();
+	        result = prime * result + area;
+	        result = prime * result + numEdges;
+	        return result;
+        }
+		@Override
+        public boolean equals(Object obj)
+        {
+	        if (this == obj)
+		        return true;
+	        if (!super.equals(obj))
+		        return false;
+	        if (getClass() != obj.getClass())
+		        return false;
+	        Polygon other = (Polygon) obj;
+	        if (area != other.area)
+		        return false;
+	        if (numEdges != other.numEdges)
+		        return false;
+	        return true;
+        }
+	}
+	
+	@JsonTypeName("circle")
+	static class Circle extends Shape
+	{
+		private int radius;
+
+		public Circle()
+        {
+			setName("circle");
+        }
+		public int getRadius()
+        {
+        	return radius;
+        }
+
+		public void setRadius(int radius)
+        {
+        	this.radius = radius;
+        }
+
+		@Override
+        public int hashCode()
+        {
+	        final int prime = 31;
+	        int result = super.hashCode();
+	        result = prime * result + radius;
+	        return result;
+        }
+
+		@Override
+        public boolean equals(Object obj)
+        {
+	        if (this == obj)
+		        return true;
+	        if (!super.equals(obj))
+		        return false;
+	        if (getClass() != obj.getClass())
+		        return false;
+	        Circle other = (Circle) obj;
+	        if (radius != other.radius)
+		        return false;
+	        return true;
+        }
+		
+		
+	}
+	
+	static class Square extends Polygon
+	{
+		
+	}
 	static class SimpleArrayPojo
 	{
 		private String id;

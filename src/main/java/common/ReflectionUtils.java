@@ -39,7 +39,7 @@ public class ReflectionUtils
 		if(fromIndex>=paramAnnotations.length)
 			throw new IllegalArgumentException("invalid fromIndex: " + fromIndex);
 		
-		for(int argIndex=fromIndex;argIndex<paramAnnotations.length;fromIndex++) {
+		for(int argIndex=fromIndex;argIndex<paramAnnotations.length;argIndex++) {
 			Annotation[] paramMarkers= paramAnnotations[argIndex];
 			
 			for (Annotation paramMarker : paramMarkers) {
@@ -49,5 +49,24 @@ public class ReflectionUtils
 		}
 		
 		return -1;
+	}
+	
+	@SuppressWarnings("unchecked")
+    public static <A extends Annotation> A getParameterAnnotation(Method method, Class<A> markerClass, int index)
+	{
+		Annotation[][] paramAnnotations = method.getParameterAnnotations();
+
+		if(index<0 || index >=paramAnnotations.length)
+			throw new IllegalArgumentException("wrong index: " + index + ": method=" + method.toGenericString());
+		
+		Annotation[] annotations = paramAnnotations[index];
+		
+		for (Annotation annotation : annotations) {
+				if(markerClass.isAssignableFrom(annotation.annotationType()))
+					return (A) annotation;
+        }
+		
+		return null;
+		
 	}
 }
