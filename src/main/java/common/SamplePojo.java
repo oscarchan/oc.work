@@ -4,7 +4,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias("SamplePojo")
+//@XStreamAlias("SamplePojo")
 public class SamplePojo
 {
 //	private static Log LOG = LogFactory.getLog(SamplePojo.class);

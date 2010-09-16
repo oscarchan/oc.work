@@ -17,17 +17,18 @@ http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd"
 <!--	<import resource="classpath:META-INF/cxf/cxf-extension-xml.xml" />-->
 
 <!--	<bean id="paymentExceptionMapper" class="com.zynga.platform.web.PaymentExceptionMapper" />-->
-	<bean id="jsonProvider" class="ws.rs.provider.XStreamJsonProvider">
-		<property name="unmarshallAsJaxbElement" value="true" />
-	</bean>
-	
+    <!-- xstream does not work nice -->
+<!--	<bean id="jsonProvider" class="ws.rs.provider.XStreamJsonProvider">-->
+<!--		<property name="unmarshallAsJaxbElement" value="true" />-->
+<!--	</bean>-->
+
 	<jaxrs:server id="jsonRestEndpoint" address="/">
 		<jaxrs:serviceBeans>
 			<ref bean="sampleService" />
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
-			<ref bean="jsonProvider" />
-<!--			<ref bean="paymentExceptionMapper" />-->
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider" />
+            <bean class="ws.rs.ServiceExceptionMapper" />
 		</jaxrs:providers>
 	</jaxrs:server>
 
