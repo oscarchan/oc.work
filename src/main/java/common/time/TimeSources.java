@@ -7,7 +7,7 @@ import java.util.Date;
  */
 public class TimeSources
 {
-	public TimeSource SYSTEM_TIME_SOURCE = new SystemTimeSource();
+	public static TimeSource SYSTEM_TIME_SOURCE = new SystemTimeSource();
 
 	
 	public static class SystemTimeSource implements TimeSource
@@ -41,6 +41,10 @@ public class TimeSources
 	        return currentTime;
         }
 
+		public void addTime(long time)
+		{
+			currentTime += time;
+		}
 		public Date now()
         {
 	        return new Date(currentTime);

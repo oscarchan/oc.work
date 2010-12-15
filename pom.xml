@@ -8,6 +8,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <inceptionYear>2008</inceptionYear>
   <packaging>war</packaging>
   <properties>
+    <spring.version>3.0.5.RELEASE</spring.version>
     <scala.version>2.7.7.RC2</scala.version>
     <scala-test.version>1.0</scala-test.version>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,7 +95,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     <dependency>
     	<groupId>org.springframework</groupId>
     	<artifactId>spring-web</artifactId>
-    	<version>2.5.6.SEC02</version>
+    	<version>${spring.version}</version>
     </dependency>
     <dependency>
     	<groupId>org.apache.cxf</groupId>
@@ -148,23 +149,17 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     <dependency>
     	<groupId>org.springframework</groupId>
     	<artifactId>spring-tx</artifactId>
-    	<version>2.5.6.SEC02</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
+    	<version>${spring.version}</version>
     </dependency>
     <dependency>
     	<groupId>org.springframework</groupId>
     	<artifactId>spring-test</artifactId>
-    	<version>2.5.6.SEC02</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
+    	<version>${spring.version}</version>
     </dependency>
     <dependency>
     	<groupId>org.springframework</groupId>
     	<artifactId>spring-aop</artifactId>
-    	<version>2.5.6.SEC02</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
+    	<version>${spring.version}</version>
     </dependency>
     <dependency>
     	<groupId>org.aspectj</groupId>
@@ -240,8 +235,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-xc</artifactId>
     	<version>1.6.0</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>3.0</version>
+        <scope>test</scope>
     </dependency>
   </dependencies>
 

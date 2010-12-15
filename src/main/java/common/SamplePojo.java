@@ -7,8 +7,6 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 //@XStreamAlias("SamplePojo")
 public class SamplePojo
 {
-//	private static Log LOG = LogFactory.getLog(SamplePojo.class);
-	
 	private String id;
 	private String mName;
 	
@@ -30,7 +28,6 @@ public class SamplePojo
 
 	public void setId(String id)
     {
-//		LOG.debug("setId(" + id + ")");
     	this.id = id;
     }
 	public String getName()
