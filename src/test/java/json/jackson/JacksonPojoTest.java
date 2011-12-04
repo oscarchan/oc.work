@@ -2,12 +2,18 @@ package json.jackson;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 
 import junit.framework.Assert;
 
@@ -24,8 +30,13 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.annotate.JsonTypeInfo.As;
 import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
 import org.codehaus.jackson.annotate.JsonTypeName;
+import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
+import org.codehaus.jackson.map.type.TypeFactory;
+import org.codehaus.jackson.type.JavaType;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.junit.Test;
 
 import common.RandomPojoTestUtils;
@@ -43,6 +54,13 @@ public class JacksonPojoTest
 		testPojo("simple-partial", new SamplePojo("id-2", null));
 	}
 	
+	@Test
+	public void testDateArray() throws JsonParseException, JsonMappingException, IOException 
+	{
+		List<Date> dates = Arrays.asList(new Date(), new Date());
+		
+		testPojo("data-array", dates);
+	}
 	/**
 	 * test composite
 	 */
@@ -73,7 +91,7 @@ public class JacksonPojoTest
 	        JsonMappingException, IOException
 	{
 		SimpleArrayPojo full = new SimpleArrayPojo().setId("id-1").setName(
-		        "name-1").setBody(Arrays.asList("a", "b", "c"));
+		        "name-1").setBody(Arrays.asList("a", "b", "c")).setLongFieldName("very long name");
 		testPojo("array-full", full);
 
 		SimpleArrayPojo partial = new SimpleArrayPojo().setId("id-1").setName(
@@ -125,30 +143,10 @@ public class JacksonPojoTest
 
 	}
 	
-
-
-	public <T> T testPojo(String prefix, T pojo)
-	        throws JsonGenerationException, JsonMappingException, IOException
-    {
-		ObjectMapper mapper = new ObjectMapper();
-
-		StringWriter writer = new StringWriter();
-		mapper.writeValue(writer, pojo);
-
-		log.info(prefix + ": output=" + writer);
-
-
-		Object parsed = mapper.readValue(writer.toString(), pojo.getClass());
-
-		Assert.assertEquals("pojo", pojo, parsed);
-
-		return (T) parsed;
-	}
-	
 	public <T> T testPojoSuper(String prefix, T pojo, Class<? super T> clazz)
 	        throws JsonGenerationException, JsonMappingException, IOException
     {
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = getObjectMapper();
 
 		StringWriter writer = new StringWriter();
 		mapper.writeValue(writer, pojo);
@@ -162,33 +160,63 @@ public class JacksonPojoTest
 
 		return (T) parsed;
 	}
+
+	private ObjectMapper getObjectMapper()
+    {
+	    ObjectMapper mapper = new ObjectMapper();
+		
+	    AnnotationIntrospector primary = new JacksonAnnotationIntrospector();
+	    AnnotationIntrospector secondary = new JaxbAnnotationIntrospector();
+	    AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
+
+	    mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+	    mapper.getSerializationConfig().setAnnotationIntrospector(introspector);
+	    return mapper;
+    }
 	
-	public <T> T testPojoCollection(String prefix, Collection<T> pojos, Class<T> pojoClass) throws JsonParseException, JsonMappingException, IOException
+	public <T> T testPojo(String prefix, T pojo) throws JsonParseException, JsonMappingException, IOException
 	{
+		if(pojo==null)
+			throw new IllegalArgumentException("missing pojo");
+		
 //		pojoClass =  new TypeReference<Map<String,User>>();
 		
-		ObjectMapper mapper = new ObjectMapper();
+		JavaType type;
+		
+		if (pojo.getClass().isArray() && Array.getLength(pojo) > 0) {
+			type = TypeFactory.arrayType(Array.get(pojo, 0).getClass());
+		} else if (pojo instanceof List) {  
+			Object next = ((List) pojo).iterator().next();
+			
+			// all list use ArrayList
+			type = TypeFactory.collectionType(ArrayList.class, next.getClass());
+		} else if (pojo instanceof Map) { 
+			throw new UnsupportedOperationException("Map is not supported: " + pojo);
+		} else { 
+			type = TypeFactory.type(pojo.getClass());
+		}
+
+		
+		ObjectMapper mapper = getObjectMapper();
 
 		StringWriter writer = new StringWriter();
-		mapper.writeValue(writer, pojos);
+		mapper.writeValue(writer, pojo);
 
 		log.info(prefix + ": output=" + writer);
 
 
-//		Object parsed = mapper.readValue(writer.toString(), pojos.getClass());
-//
-//		Assert.assertEquals("pojo", pojos, parsed);
-//
-//		return (T) parsed;
-		
-		return null;
+		Object parsed = mapper.readValue(writer.toString(), type);
+
+		Assert.assertEquals("pojo", pojo, parsed);
+
+		return (T) parsed;
 	}
 
 	public void testSimpleObject2() throws JsonProcessingException, IOException
 	{
 		String sample = "{\"oscarchan1@gmail.com\":\"40000027652\",\"oscarchan2@gmail.com\":40000027666}";
 
-		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper objectMapper = getObjectMapper();
 
 		JsonNode tree = objectMapper.readTree(sample);
 
@@ -212,7 +240,7 @@ public class JacksonPojoTest
 	{
 		String sample = "[{\"oscarchan1@gmail.com\":\"40000027652\"},{\"oscarchan2@gmail.com\":\"40000027666\"}]";
 
-		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper objectMapper = getObjectMapper();
 
 		JsonNode tree = objectMapper.readTree(sample);
 
@@ -419,11 +447,15 @@ public class JacksonPojoTest
 	{
 		
 	}
+	
+	
+	@XmlAccessorType(XmlAccessType.FIELD)
 	static class SimpleArrayPojo
 	{
 		private String id;
 		private String name;
 		private List<String> body;
+		private String long_field_name;
 
 		public String getId()
 		{
@@ -440,6 +472,11 @@ public class JacksonPojoTest
 			return body;
 		}
 
+		public String getLongFieldName()
+        {
+	        return long_field_name;
+        }
+		
 		public SimpleArrayPojo setId(String id)
 		{
 			this.id = id;
@@ -459,45 +496,64 @@ public class JacksonPojoTest
 			this.body = body;
 			return this;
 		}
+		
+		public SimpleArrayPojo setLongFieldName(String fieldName)
+        {
+	        this.long_field_name = fieldName;
+	        return this;
+        }
 
 		@Override
-		public int hashCode()
-		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((body == null) ? 0 : body.hashCode());
-			result = prime * result + ((id == null) ? 0 : id.hashCode());
-			result = prime * result + ((name == null) ? 0 : name.hashCode());
-			return result;
-		}
+        public int hashCode()
+        {
+	        final int prime = 31;
+	        int result = 1;
+	        result = prime * result + ((body == null) ? 0 : body.hashCode());
+	        result = prime * result + ((id == null) ? 0 : id.hashCode());
+	        result = prime
+	                * result
+	                + ((long_field_name == null) ? 0 : long_field_name
+	                        .hashCode());
+	        result = prime * result + ((name == null) ? 0 : name.hashCode());
+	        return result;
+        }
 
 		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			SimpleArrayPojo other = (SimpleArrayPojo) obj;
-			if (body == null) {
-				if (other.body != null)
-					return false;
-			} else if (!body.equals(other.body))
-				return false;
-			if (id == null) {
-				if (other.id != null)
-					return false;
-			} else if (!id.equals(other.id))
-				return false;
-			if (name == null) {
-				if (other.name != null)
-					return false;
-			} else if (!name.equals(other.name))
-				return false;
-			return true;
-		}
+        public boolean equals(Object obj)
+        {
+	        if (this == obj)
+		        return true;
+	        if (obj == null)
+		        return false;
+	        if (getClass() != obj.getClass())
+		        return false;
+	        SimpleArrayPojo other = (SimpleArrayPojo) obj;
+	        if (body == null) {
+		        if (other.body != null)
+			        return false;
+	        } else if (!body.equals(other.body))
+		        return false;
+	        if (id == null) {
+		        if (other.id != null)
+			        return false;
+	        } else if (!id.equals(other.id))
+		        return false;
+	        if (long_field_name == null) {
+		        if (other.long_field_name != null)
+			        return false;
+	        } else if (!long_field_name.equals(other.long_field_name))
+		        return false;
+	        if (name == null) {
+		        if (other.name != null)
+			        return false;
+	        } else if (!name.equals(other.name))
+		        return false;
+	        return true;
+        }
+
+		
+		
+		
 
 	}
 

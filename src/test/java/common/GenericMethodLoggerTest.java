@@ -26,9 +26,9 @@ import ws.rs.RestSampleService;
 import common.time.TimeSources.AdjustableTimeSource;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(loader=AnnotationConfigContextLoader.class, value="common.GenericMethodLoggerTest")
-@ContextConfiguration(locations={"/common/GenericMethodLoggerTest.xml"})
-//@Configuration
+@ContextConfiguration(loader=AnnotationConfigContextLoader.class, value="common.GenericMethodLoggerTest")
+//@ContextConfiguration(locations={"/common/GenericMethodLoggerTest.xml"})
+@Configuration
 public class GenericMethodLoggerTest
 {
     private static Logger log = LoggerFactory.getLogger(GenericMethodLoggerTest.class);
@@ -61,28 +61,28 @@ public class GenericMethodLoggerTest
 	}
 	
 //	@Bean  /** same as adding <aop:aspectj-autoproxy />*/
-	public AnnotationAwareAspectJAutoProxyCreator setUpAopScan()
-	{
-		AnnotationAwareAspectJAutoProxyCreator creator = new AnnotationAwareAspectJAutoProxyCreator();
-		
-		creator.setProxyTargetClass(true);
-		
-		return creator;
-	}
-	
-//	@Bean(name="mockedLogger")
+//	public AnnotationAwareAspectJAutoProxyCreator setUpAopScan()
+//	{
+//		AnnotationAwareAspectJAutoProxyCreator creator = new AnnotationAwareAspectJAutoProxyCreator();
+//		
+//		creator.setProxyTargetClass(true);
+//		
+//		return creator;
+//	}
+//	
+	@Bean(name="mockedLogger")
 	public Logger setUpMockedLogger()
 	{
 		return EasyMock.createMock(Logger.class);
 	}
 	
-//	@Bean(name="methodLogger")
+	@Bean(name="methodLogger")
 	public GenericMethodLogger getMethodLogger()
 	{
 		return new TestLogger();
 	}
 
-//	@Bean(name="restSampleService")
+	@Bean(name="restSampleService")
 	public RestSampleService setUpRestSampleService()
 	{
 		return new RestSampleService();
