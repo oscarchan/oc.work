@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="../libs/jqueryui/1.8/themes/redmond/jquery-ui-1.8.17.custom.css" />
 
     <!-- table -->
-    <script src="../libs/jqGrid/3.8.2/js/i18n/grid.locale-en.js"></script>
-    <script src="../libs/jqGrid/3.8.2/js/jquery.jqGrid.min.js"></script>
-    <link rel="stylesheet" href="../libs/jqGrid/3.8.2/css/ui.jqgrid.css" />
+    <script src="../libs/jqGrid/4.3.1/js/i18n/grid.locale-en.js"></script>
+    <script src="../libs/jqGrid/4.3.1/js/jquery.jqGrid.min.js"></script>
+    <link rel="stylesheet" href="../libs/jqGrid/4.3.1/css/ui.jqgrid.css" />
 
     
     <style type="text/css">
@@ -149,9 +149,17 @@
                     cell: "",
                     id: 0
                 },
-                "caption": "font table"
+                "caption": "font table",
+                loadComplete: function(data) {
+                    $("#example tr td[role=gridcell]:first-child").each(function() {
+                        $(this).css('fontFamily', $(this).text());
+                    });
+                }
 
-            }).navGrid("#exampleNavGrid", {edit:false,add:false,del:false});
+
+            }).navGrid("#exampleNavGrid", {edit:false,add:false,del:false})
+            .setGridWidth(800)  // grid width
+            .width(50);    // cell width
         });
     </script>
 </head>
