@@ -55,11 +55,24 @@ public class Schedule
 		return min.matches(MINUTE_REGEX) && hour.matches(HOUR_REGEX);
 	}
 	
+	/**
+	 * only support the following
+	 *   - every X hours
+	 *   - every X minutes
+	 *   - otherwise, treat recurring as every day
+	 *   
+	 * @return
+	 */
 	public long getRecurringInterval()
 	{
-		Integer minInterval = getPerInterval(this.min);
-		if(minInterval!=null)
-			return minInterval * 60 * 1000L;
+		int perMinuteInterval = getPerMinuteInterval();
+		int perHourInterval = getPerHourInterval();
+		
+		if(perMinuteInterval==1 && perHourInterval==1
+				|| perMinuteInterval>1)
+			return perMinuteInterval * 60 * 1000L;  // every X minues
+		else if (perHourInterval > 1)
+			return perHourInterval * 60 * 60 * 1000L; // every X hours
 		else
 			return 24 * 60 * 60 * 1000L; // 1 day
 	}
@@ -216,5 +229,12 @@ public class Schedule
 	public String toString() {
 		return "schd[" + min + " " + hour + "]";
 	}
-	
+
+	// TODO MED move hour and unit logic to inner class 
+	static class ScheduleUnit
+	{
+		String raw;
+		int perIncrement;
+		int fixedValue;
+	}
 }

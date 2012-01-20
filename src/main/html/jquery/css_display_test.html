@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSS Display properties</title>
+    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" ></script>-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("input").bind('click', function(event) {
+                var selected = this.value;
+                console.log(": selected=" + selected);
+                var myspan = $(".myspan")[0];
+                myspan.style.display = selected;
+            });
+        });
+    </script>
+    <style type="text/css">
+        .myspan {
+            color: red;
+        }
+    </style>
+
+</head>
+<body>
+    <div>
+        <form>
+            <label>
+                <input type="radio" name="display" value="none"/>
+                None
+            </label><br/>
+            <label>
+                <input type="radio" name="display" value="block"/>
+                Block
+            </label>
+            <label>
+                <input type="radio" name="display" value="inline"/>
+                Inline
+            </label>
+            <label>
+                <input type="radio" name="display" value="inline-block"/>
+                Inline-Block
+            </label>
+            <label>
+                <input type="radio" name="display" value="inline-table"/>
+                Inline-table
+            </label>
+            <label>
+                <input type="radio" name="display" value="list-item"/>
+                List-item
+            </label>
+            <label>
+                <input type="radio" name="display" value="run-in"/>
+                Run-in
+            </label>
+            <label>
+                <input type="radio" name="display" value="table"/>
+                Table
+            </label>
+            <label>
+            <input type="radio" name="display" value="table-caption"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="table-cell"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="table-column"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="table-column-group"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="table-footer-group"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="table-header-group"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="table-row"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="table-row-group"/>
+            </label>
+            <label>
+                <input type="radio" name="display" value="inherit"/>
+            </label>
+        </form>
+    </div>
+    <div>
+        <span>beginning of 1st span</span>
+        <span class="myspan">my span</span>
+        <span>end of last span</span>
+    </div>
+</body>
+</html>

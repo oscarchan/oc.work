@@ -9,10 +9,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
+import scala.actors.threadpool.Arrays;
+
 public class StringTest
 {
 	private static final Log mLog = LogFactory.getLog(StringTest.class);
 	
+	@Test
+	public void testRegex()
+	{
+		String expr = "*/4";
+		String[] split = expr.split("[ ]*/[ ]*");
+		
+		mLog.info("splits=" + Arrays.asList(split));
+	}
 	@Test
 	public void testConstant()
 	{
@@ -46,20 +56,25 @@ public class StringTest
 	@Test
 	public void testSplit_multiChars()
 	{
-		String sample = "abc, xyz, hef";
+		String sample = "abc, xyz,hef";
 		
 		String[] result1 = sample.split(",");
 		String[] result2 = sample.split(", ");
+		String[] result3 = sample.split(",[ ]*");
 		
 		Assert.assertEquals("result 1 size", 3, result1.length);
 		Assert.assertEquals("result 1 #1", "abc", result1[0]);
-		Assert.assertEquals("result 1 #2", " xyz", result1[1]);
-		Assert.assertEquals("result 1 #3", " hef", result1[2]);
+		Assert.assertEquals("result 1 #2", " xyz", result1[1]);  // extra space
+		Assert.assertEquals("result 1 #3", "hef", result1[2]);  
 
-		Assert.assertEquals("result 2 size", 3, result2.length);
+		Assert.assertEquals("result 2 size", 2, result2.length);
 		Assert.assertEquals("result 2 #1", "abc", result2[0]);
-		Assert.assertEquals("result 2 #2", "xyz", result2[1]);
-		Assert.assertEquals("result 2 #3", "hef", result2[2]);
+		Assert.assertEquals("result 2 #2", "xyz,hef", result2[1]);   // joint token
+
+		Assert.assertEquals("result 3 size", 3, result3.length);
+		Assert.assertEquals("result 3 #1", "abc", result3[0]);
+		Assert.assertEquals("result 3 #2", "xyz", result3[1]);
+		Assert.assertEquals("result 3 #3", "hef", result3[2]);  
 
 	}
 	@Test
