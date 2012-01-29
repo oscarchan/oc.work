@@ -11,9 +11,13 @@
     <script src="../libs/jqGrid/4.3.1/js/i18n/grid.locale-en.js"></script>
     <script src="../libs/jqGrid/4.3.1/js/jquery.jqGrid.min.js"></script>
     <link rel="stylesheet" href="../libs/jqGrid/4.3.1/css/ui.jqgrid.css" />
-
     
     <style type="text/css">
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-size: 175%;
+        }
         #example {
             color: #0066cc;
             font-family: sans-serif;
@@ -22,16 +26,21 @@
             background-color: #cccccc;
         }
 
-        tr.odd {
+        /* does not work */
+        tr.ui-jqgrid-labels th.ui-state-default.ui-th-column.ui-th-ltr {
+            background-color: #d6d6d6;
+
         }
-        
-        tr.even {
+        .ui-jqgrid tr.ui-row-even td {
             background-color: #f1f1f1;
         }
-            
-        
-        
+
     </style>
+
+
+
+
+
     <script>
         $(function() {
             function Fonts() {}
@@ -131,6 +140,7 @@
 //            $('#demo').html( '<table cellpadding="10" cellspacing="1" border="0" id="example"></table>' );
             $('#example').jqGrid( {
                 "datatype": "local",
+                "height": "auto",
                 "data": data,
                 "colNames": ["Font", "Width", "Height", "Detected"],
                 "colModel": [
@@ -154,11 +164,15 @@
                     $("#example tr td[role=gridcell]:first-child").each(function() {
                         $(this).css('fontFamily', $(this).text());
                     });
+
+                    $("#example tr[role=row]:even").addClass("ui-row-even");
+
                 }
 
 
             }).navGrid("#exampleNavGrid", {edit:false,add:false,del:false})
-            .setGridWidth(800)  // grid width
+//            .setGridWidth(800)  // grid width
+//            .setGridHeight(500)
             .width(50);    // cell width
         });
     </script>
