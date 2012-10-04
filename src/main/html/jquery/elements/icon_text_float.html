@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+
+    .ui-provider {
+        float: left;
+        font-family: helvetica, sans-serif;
+    }
+
+    .ui-provider .icon {
+        float: left;
+        width: 3em;
+        height: 3em;
+    }
+
+    .ui-provider .name {
+        color: #0066DD;
+        font-weight: bold;
+    }
+    .ui-provider .title {
+        font-size: 0.8em;
+        color: #535335;
+    }
+
+    .ui-provider div.icon {
+        background:  url(../images/ui-icon-male.png) ;
+        background-repeat: no-repeat;
+
+        width: auto;
+        height: auto;
+        margin: 0;
+        padding: 0;
+
+        /*vertical-align: middle;*/
+    }
+
+    </style>
+</head>
+<body>
+  <!-- work great!! -->
+  <div class="ui-provider">
+    <img class="icon" src="../images/ui-icon-male.png" />
+    <div class="">
+        <span class="name">Oscar Myers</span>
+        <span class="title">Chef</span>
+    </div>
+  </div>
+
+  <!-- work better!! -->
+  <div class="ui-provider">
+    <img class="icon" src="../images/ui-icon-male.png" />
+    <div class="">
+        <span class="name" style="display: block;">Oscar Myers</span>
+        <span class="title" style="display: block;">Chef</span>
+    </div>
+  </div>
+
+  <!-- work better!! -->
+  <div class="ui-provider">
+    <img class="icon" src="../images/ui-icon-male.png" />
+    <div class="">
+        <span class="name" style="display: block;">Oscar Myers</span>
+        <span class="title" style="display: block;">Chef</span>
+    </div>
+  </div>
+
+  <!-- Div w/ background.  Does not work with a lot of positioning works!! -->
+  <div class="ui-provider">
+    <div class="icon" />
+
+    <div>
+        <span class="name">Oscar Wilde</span>
+        <span class="title">Writer</span>
+    </div>
+  </div>
+
+  <div class="ui-provider">
+    <img class="icon" src="../images/ui-icon-male.png"/>
+
+    <!-- NOTE: no div, does not go to two rows -->
+    <span class="name">Oscar Wilde</span>
+    <span class="title">Writer</span>
+  </div>
+  <div class="ui-provider">
+    <img class="icon" src="../images/ui-icon-male.png"/>
+
+    <!-- does not go to two rows -->
+    <span class="name">Oscar Wilde</span>
+    <span class="title">Writer</span>
+  </div>
+  <!-- control -->
+  <div class="ui-provider">
+    <img class="icon" src="../images/ui-icon-male.png" />
+    <div class="">
+        <span class="name">Oscar Myers</span>
+        <span class="title">Chef</span>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+
+    .ui-provider {
+        width: 9em;
+
+
+        /* --- clearfix --- */
+        overflow: hidden;
+        display: inline-block;  Necessary to trigger "hasLayout" in IE
+        display: block;  Sets element back to block
+    }
+
+    .ui-provider .column {
+        /* --- clearfix --- */
+        position: relative;
+
+        /* -- size -- */
+        width: 46%;
+        padding: 1%;
+
+    }
+
+    .ui-provider .left {
+        float: left;
+    }
+
+    .ui-provider .right {
+        float: right;
+    }
+    .icon {
+        background: transparent url(https://ssl.gstatic.com/s2/contacts/images/NoPicture.gif) ;
+        background-position: left center;
+        background-repeat: no-repeat;
+
+        width: 3em;
+        height: 3em;
+
+        background-size: 100% 100%;
+        /*padding-left: ; *//* Or size of icon + spacing */
+        vertical-align: middle;
+
+
+    }
+
+    </style>
+</head>
+<body>
+  <div class="ui-provider">
+    <img class="column left" src="../images/ui-icon-male.png" />
+    <div class="column right">
+        <span>Oscar Myers</span>
+        <span>Chef</span>
+    </div>
+  </div>
+
+  <div class="ui-provider">
+    <img class="column left icon" />
+    <div class="column right">
+        <span>Oscar Wilde</span>
+        <span>Writer</span>
+    </div>
+
+
+
+</body>
+</html>

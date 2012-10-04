@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+<P STYLE="height: 3em; background: gray;">
+    <strong>Extended Height</strong>
+</P>
+
+<P STYLE="height: 2em; background: gray;">
+    <strong>Fixed Height - note: it overlap with other rows</strong>
+    1nd. There are a few things to keep in mind with regard to floating elements. In the first place,
+    a floated element is in some respects removed from the normal flow of the document,
+    although it still affects the layout. In a manner utterly unique to CSS, floated elements exist almost on their own plane,
+    yet they still have major influence over the rest of the document.
+    There are a few things to keep in mind with regard to floating elements. In the first place,
+    a floated element is in some respects removed from the normal flow of the document,
+    although it still affects the layout. In a manner utterly unique to CSS, floated elements exist almost on their own plane,
+    yet they still have major influence over the rest of the document.
+</p>
+
+<!-- fixed height with hidden overflow -->
+<P STYLE="height: 2em; background: #9acd32; color: red; overflow: hidden;">
+    <strong>Fixed Height with hidden overflow</strong> . There are a few things to keep in mind with regard to floating elements. In the first place,
+    a floated element is in some respects removed from the normal flow of the document,
+    although it still affects the layout. In a manner utterly unique to CSS, floated elements exist almost on their own plane,
+    yet they still have major influence over the rest of the document.
+    There are a few things to keep in mind with regard to floating elements. In the first place,
+    a floated element is in some respects removed from the normal flow of the document,
+    although it still affects the layout. In a manner utterly unique to CSS, floated elements exist almost on their own plane,
+    yet they still have major influence over the rest of the document.
+</p>
+
+<!-- margin top and bottom can overlay each other -->
+<p style="margin-top: 10px; margin-bottom: 20px; background: gray;">
+   <strong>margin bottom overlap with margin top of next line item</strong>
+</p>
+
+<p style="margin-top: 10px; margin-bottom: 20px; background: gray;">
+   <strong>margin 2</strong>
+</p>
+
+<p style="margin-top: 10px; margin-bottom: 20px; background: gray;">
+   <strong>margin 3</strong>
+
+
+<!-- default width -->
+<p style="background: #a52a2a;">
+    <strong>default width - same as auto</strong>
+</p>
+
+<!-- auto width -->
+<p style="background: #a52a2a; width: auto">
+    <strong>auto width - zero horizonal padding, border, and margin</strong>
+</p>
+
+<!--
+  auto width within a fixed div
+  NOTE:
+    the fix width in <div> forces right margin always to be "auto",
+    hence, right margin fills up the space
+
+    auto width of inner elmenet, <p>, consumes all space
+  -->
+<div style="width: 220px; background: grey; height: 5em;">
+    <p style="background: #a52a2a; width: auto;">
+        <strong>auto width within a fixed width div</strong>
+    </p>
+</div>
+
+<!--
+   oversize child within a fixed div
+   NOTE:
+     oversize child can grow out of his parent
+-->
+<div style="width: 200px; background: grey; height: 3em;">
+    <p style="background: #a52a2a; width: 300px">
+        <strong>auto width and padding within a fixed width div</strong>
+    </p>
+</div>
+
+
+<!--
+   auto width and padding within a fixed div
+   NOTE:
+     more padding is given to left padding when they cannot be divided evenly
+-->
+<div style="width: 200px; background: grey; height: 30em;">
+    <p style="background: #a52a2a; width: auto; padding: 10em; ">
+        <strong>auto width and padding within a fixed width div</strong>
+    </p>
+</div>
+
+</body>
+</html>

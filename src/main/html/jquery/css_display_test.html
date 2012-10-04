@@ -3,20 +3,32 @@
 <head>
     <title>CSS Display properties</title>
     <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" ></script>-->
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>-->
+    <script src="../libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
+
     <script type="text/javascript">
         $(function() {
             $("input").bind('click', function(event) {
                 var selected = this.value;
                 console.log(": selected=" + selected);
-                var myspan = $(".myspan")[0];
-                myspan.style.display = selected;
+                var myspan = $(".myspan").each(function() { $(this).css('display', selected) });
+//                myspan.style.display = selected;
             });
+            $(".myspan:even").css("background-color", "#bbbbff");
+            $(".myspan:odd").css("background-color", "#0099cc");
+            $("label:even").css("background-color", "#bbbbff");
+            $("label:odd").css("background-color", "#0099cc");
+	  
         });
     </script>
     <style type="text/css">
+
+
         .myspan {
             color: red;
+            padding: 0px;
+	    margin: 0px;
+	    border: 0px;
         }
     </style>
 
@@ -87,7 +99,9 @@
     </div>
     <div>
         <span>beginning of 1st span</span>
-        <span class="myspan">my span</span>
+        <span class="myspan">my span 1</span>
+        <span class="myspan">my span 2</span>
+        <span class="myspan">my span 3</span>
         <span>end of last span</span>
     </div>
 </body>

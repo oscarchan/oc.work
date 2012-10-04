@@ -8,7 +8,135 @@
     <!-- link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/redmond/jquery-ui.css" -->
     <link rel="stylesheet" href="../libs/jqueryui/1.8/themes/redmond/jquery-ui.css">
 
+    <!-- table -->
+    <script src="../libs/jqGrid/4.3.1/js/i18n/grid.locale-en.js"></script>
+    <script src="../libs/jqGrid/4.3.1/js/jquery.jqGrid.min.js"></script>
+    <link rel="stylesheet" href="../libs/jqGrid/4.3.1/css/ui.jqgrid.css" />
+
+
     <style type="text/css">
+        /** --- tabs starts --- **/
+        #main_nav.ui-tabs .ui-tabs-nav {
+            height: 2.35em;   /** required to adjust the height correct */
+            text-align: right;
+        }
+        #main_nav.ui-tabs .ui-tabs-nav li {
+            display: inline-block;
+            float: none;
+            margin: 0em;  /* required to align the bottom */
+        }
+
+        #tab-panel-schedule.ui-tabs .ui-tabs-nav {
+            text-align: center;
+        }
+        #tab-panel-schedule.ui-tabs .ui-tabs-nav li {
+            float: none;
+            text-align: center;
+            margin: 0% .15% 0%;
+        }
+
+        div#tab-panel-schedule.ui-tabs .ui-tabs-panel {
+            margin: 2em;
+        }
+        /** --- schedule --- */
+        .ui-provider {
+            /* --- clearfix --- */
+            /*clear: both;*/
+            /*overflow: hidden;*/
+            /*display: inline-block; *//* Necessary to trigger "hasLayout" in IE */
+            /*display: block; *//* Sets element back to block */
+
+
+            /*display: inline-block;*/
+            /*text-align: left;*/
+            float: left;
+            font-family: helvetica, sans-serif;
+            width: 6em;
+            height: 3em;
+        }
+
+        .ui-provider .icon {
+            float: left;
+            width: 3em;
+            height: 3em;
+        }
+
+        .ui-provider div {
+
+        }
+        .ui-provider .name {
+            color: #0066DD;
+            font-weight: bold;
+            display: block;
+        }
+
+        .ui-provider .title {
+            font-size: 0.8em;
+            color: #535335;
+            display: block;
+        }
+
+        .column-container {
+            /* --- clearfix --- */
+            overflow: hidden;
+            display: inline-block; /* Necessary to trigger "hasLayout" in IE */
+            display: block; /* Sets element back to block */
+
+        }
+
+        .column {
+            /* --- clearfix --- */
+            position: relative;
+
+            /* -- size -- */
+            width: 46%;
+            padding: 1%;
+        }
+
+        .column_80 {
+            width: 78%;
+        }
+
+        .column_20 {
+            width: 18%;
+        }
+
+        .left {
+            float: left;
+        }
+
+        .right {
+            float: right;
+        }
+
+        /** --- jqgrid --- */
+        #openTimeslots .ui-widget-content, #openTimeslotsContainer .ui-widget-content{
+            /* -- fonts */
+            color: #0066DD;
+        }
+
+        #openTimeslots tr.jqgroup {
+            background: #cccccc;
+        }
+
+        #openTimeslotsContainer .ui-jqgrid tr.ui-row-ltr.jqgroup td {
+            font-weight: bold;
+        }
+
+        #openTimeslotsContainer thead {
+            display: none;
+        }
+
+        /** ----- end ----- */
+
+        /** --- tags ends --- */
+
+        /** --- calendar starts --- **/
+        /** TODO need to figure out how to adjust width based on the content */
+        #open_cal .ui-datepicker-inline.ui-datepicker.ui-widget {
+            width:230px;
+        }
+
         .ui-datepicker-multi-2 .ui-datepicker-group {
             /*width: 48%;*/
             padding: 5px;
@@ -17,9 +145,6 @@
         .ui-datepicker-row-break {
             padding-top: 20px;
         }
-
-        /*}*/
-        /**/
 
         /*.ui-datepicker-multi .ui-datepicker-header {*/
             /*-moz-border-radius-topleft: 5px; -webkit-border-top-left-radius: 5px; -khtml-border-top-left-radius: 5px; border-top-left-radius: 5px;*/
@@ -59,6 +184,7 @@
             border: 1px solid #ff9131;
             /*background: #fbec88;*/
         }
+        
     </style>
     <script>
 //        $(function() {
@@ -66,6 +192,9 @@
 //        });
 
         $(function() {
+            $("#main_nav").tabs();
+            $("#tab-panel-schedule").tabs();
+
            $("#open_cal").datepicker( {
                numberOfMonths: [3, 1],
                beforeShowDay: function(date) {
@@ -91,17 +220,245 @@
                }
            } );
 
+            var calendar = $(".ui-datepicker-group");
+            var height = calendar.height();
+            var width = calendar.width();
 
+           $(".ui-datepicker-group").resizable( { minHeight: height, minWidth: width});
+            
            /** update the date picker's ui */
            // round corners
 //           $(".ui-datepicker-multi .ui-datepicker-header").addClass("ui-corner-all");
-            
+
+
+            console.log("--- schedule ---");
+
+            // --- schedule ---
+            function Schedule() {}
+
+            Schedule.listAvailable = function()
+            {
+                var openList = [];
+                var date = Date.today().moveToFirstDayOfMonth();
+                var lastDayOf3MonthLater = Date.today().add(3).months().moveToLastDayOfMonth();
+
+                var persons = ["Dianna", "Alex", "Tom", "Gail", "Yuki", "Heather", "Xavior"];
+
+                while(date.isBefore(lastDayOf3MonthLater)) {
+
+                    if (date.getDate()%3==1 || date.getDate()%5==4) {
+                        console.log("processing " + date);
+
+
+                        var id = Math.floor(Math.random()* 1000000);
+                        var index = Math.floor(Math.random()* persons.length);
+                        var person = persons[index];
+
+                        var row =
+                        {
+                            id: id,
+                            timestamp: date.toString("yyyy-MM-ddTHH:mm:ss"),
+                            date: date.toString("MMM d, yyyy"),
+                            time: date.toString("HH:mm"),
+                            provider_name: person,
+                            provider_icon: "ui-icon-male"
+                        };
+
+                        console.log("created: " + row);
+
+                        openList.push(row);
+
+                        if(Math.floor(Math.random()* 2)==1)
+                        {
+                            index++;
+
+                            if(index>=persons.length)
+                              index = 0;
+
+                            row = {
+                                id: id,
+                                timestamp: date.toString("yyyy-MM-ddTHH:mm:ss"),
+                                date: date.toString("MMM d, yyyy"),
+                                time: date.toString("HH:mm"),
+                                provider_name: persons[index],
+                                provider_icon: "images/ui-icon-male.png"
+
+                            };
+
+                            console.log("created: " + row);
+                            openList.push(row)
+                        }
+                    }
+
+                    date.add(1).days();
+
+                }
+
+                return openList;
+             };
+
+            var openList = Schedule.listAvailable();
+
+            console.log("openList: " + openList);
+
+            var data = {
+              "page": 1,
+              "total": 1,
+              "records": openList.length,
+              "rows": openList
+            };
+
+            var colModel =  [
+//              {name:'id',width:50, sorttype:"int", editable: true,formatter:'number'},
+                {name:'date',label:'Date', width:10,editable: true},
+                {name:'time',label:'Time', width:10, align:"center", editable: true},
+//              {name:'timestamp',label:'Price', width:100, align:"right", editable: true},
+                {name:'provider_name',label:'Practitioner',width:80, align:"left", editable: true,
+                    formatter: function(cellvalue, options, rowObject) {
+                        // option 1: img + span
+                        return  "<div class='ui-provider'>" +
+                                    "<img class='icon' src='images/ui-icon-male.png'/>" +
+                                    "<div style='right: 3em;'>" +
+                                        "<span class='name' style='display: block'>" + cellvalue + "</span>" +
+                                        "<span class='title' style='display: block'>Acpt</span>" +
+                                    "</div>" +
+                                "</div>" +
+                                "<div class='ui-provider'>" +
+                                    "<img class='icon' src='images/ui-icon-male.png'/>" +
+                                    "<div style='clear: inherit;'>" +
+                                        "<span class='name'>" + cellvalue + "</span>" +
+                                        "<span class='title'>Acpt</span>" +
+                                    "</div>" +
+                                "</div>";
+
+                        // option 2: span only
+//                        return "<span class='ui-icon-male' />" + cellvalue + "</span>";
+
+                        // option 3: span span
+//                        return "<span class='ui-icon-male' />" +
+//                            "<span class='ui-button-text'>" + cellvalue + "</span>" +
+//                            "<span class='ui-button-text'>Acpt</span>";
+
+                        // option 4: span { span span }
+//                        return "<span class='ui-provider'>" +
+//                                "<span class='ui-icon-male' />" +
+//                                "<span class='ui-button-text'>" + cellvalue + "</span>" +
+//                                "<span class='ui-button-text'>Acpt</span>" +
+//                            "</span>" +
+//                            "<span class='ui-provider'>" +
+//                                "<span class='ui-icon-male' />" +
+//                                "<span class='ui-button-text'>" + cellvalue + "</span>" +
+//                                "<span class='ui-button-text'>Acpt</span>" +
+//                            "</span>";
+
+                    }
+                }
+              ];
+
+            $("#openTimeslots").jqGrid( {
+                /* option 1: datatype - jsonstring */
+                "datastr": data,
+                "datatype": "jsonstring",
+                "jsonReader": { repeatitems: false },
+
+                /* option 2: datatype - json, local */
+//                "datastr": data,
+//                "datatype": "jsonstring",
+//                "jsonReader": { repeatitems: false },
+
+                /* additional ui adjustments */
+                pager: "#openTimeslotsPager",
+                viewrecords: true,
+                height: "auto",
+                rowNum: 5,
+
+                /* autowith & shrinkToFit turns jqgrid column width in colModel as width percentage */
+                autowidth: true,
+                shrinkToFit: true,
+
+                ignoreCase: true,
+//                caption: "Open Time Slots",
+
+                /** grouping option */
+                grouping: true,
+                groupingView: {
+                    groupField: ["date"],
+                    groupDataSorted: true,
+                    groupColumnShow: false
+                },
+
+
+
+                "colModel": colModel
+            });
+
+//            $(".jqgroup").addClass("ui-state-highlight");
+
+            /** hide the column headers of outter table */
+            $("#openTimeslotsContainer thead").hide();
+
         });
     </script>
 </head>
 <body>
-  <article>
-      <div id="open_cal"></div>
-  </article>
+<div id="main_nav">
+    <ul>
+        <li><a href="#tab-panel-schedule" id="tab-schedule">Schedule</a></li>
+        <li><a href="#tab-panel-updates" id="tab-updates">Updates</a></li>
+        <li><a href="#tab-panel-notes" id="tab-notes">Notes</a></li>
+        <li><a href="#tab-panel-history" id="tab-history"><span>History</span></a></li>
+        <li><a href="#tab-panel-settings" id="tab-settings"><span>Settings</span></a></li>
+    </ul>
+    <div id="tab-panel-schedule">
+        <ul>
+            <li><a href="#tab-schedule-first-available">First Available</a></li>
+            <li><a href="#tab-schedule-day">Day</a></li>
+            <li><a href="#tab-schedule-week">Week</a></li>
+            <li><a href="#tab-schedule-month">Month</a></li>
+        </ul>
+        <div id="tab-schedule-first-available" class="column-container">
+
+            <div class="left column_20">
+                <!--<div id="open_title">-->
+                    <!--<span class="ui-widget">Open Schedule</span>-->
+                <!--</div>-->
+                <div id="open_cal"></div>
+                <div id="first-avail-grid-container">
+                    <div id="first-avail-grid-nav"></div>
+                    <table id="first-avail-grid"></table>
+                    <div id="first-avail-pager"></div>
+                </div>
+            </div>
+            <div id="openTimeslotsContainer" class="right column_80">
+                <div id="openTimeslotsNavGrid"></div>
+                <table id="openTimeslots"></table>
+                <div id="openTimeslotsPager"></div>
+            </div>
+
+
+        </div>
+        <div id="tab-schedule-day">
+            Day View
+        </div>
+        <div id="tab-schedule-week">
+            Week View
+        </div>
+        <div id="tab-schedule-month">
+            Month View
+        </div>
+    </div>
+    <div id="tab-panel-updates">
+        <p>xyz</p>
+    </div>
+    <div id="tab-panel-notes">
+        <p>xyz</p>
+    </div>
+    <div id="tab-panel-history">
+        <p>xyz</p>
+    </div>
+    <div id="tab-panel-settings">
+        <p>xyz</p>
+    </div>
+</div>
 </body>
 </html>

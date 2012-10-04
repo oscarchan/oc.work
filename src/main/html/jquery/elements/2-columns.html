@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+ <style>
+
+    #columns {
+        width: 100%;  /* optional */
+
+        /* --- clearfix --- */
+        overflow: hidden;
+        display: inline-block; /* Necessary to trigger "hasLayout" in IE */
+        display: block; /* Sets element back to block */
+    }
+
+    #columns .column {
+        /* --- clearfix --- */
+        position: relative;
+
+        /* -- size -- */
+        width: 46%;
+        padding: 1%;
+
+        border: solid 1px #000;
+    }
+
+    #columns .left {
+        float: left;
+    }
+
+    #columns .right {
+        float: right;
+    }
+
+</style>
+
+<div>
+    <p>bottom line: here are some random texts.
+        This quick semi-tutorial describes how I built this page. I'm no expert. But this page works, so here's how I
+        did it. I presume you know what style sheets are, have probably used them for typography, knew of their promise
+        for the future, but kept using tables for layout because they were the only thing that worked right now. Well,
+        Jeffrey et al (see sidebar) have broken our chains, and we can finally use pure CSS.
+    </p>
+</div>
+
+<div id="columns">
+    <div class="left column">
+        <p>Columns in text are a very handy tool.</p>
+        <p>Unfortunately, most designers don't use
+        them because they're tedious to implement.</p>
+    </div>
+    <div class="right column">
+        <p>However, if you take the time and effort
+            of putting them into use, you'll find
+            that they really add to the aesthetics
+            and functionality of your work.
+            This quick semi-tutorial describes how I built this page. I'm no expert. But this page works, so here's how
+            I
+            did it. I presume you know what style sheets are, have probably used them for typography, knew of their
+            promise
+            for the future, but kept using tables for layout because they were the only thing that worked right now.
+            Well,
+        </p>
+    </div>
+</div>
+<div>
+    <p>bottom line: here are some random texts.
+        This quick semi-tutorial describes how I built this page. I'm no expert. But this page works, so here's how I
+        did it. I presume you know what style sheets are, have probably used them for typography, knew of their promise
+        for the future, but kept using tables for layout because they were the only thing that worked right now. Well,
+        Jeffrey et al (see sidebar) have broken our chains, and we can finally use pure CSS.
+    </p>
+</div>
+</html>

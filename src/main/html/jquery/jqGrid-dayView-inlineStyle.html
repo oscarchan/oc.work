@@ -13,108 +13,6 @@
     <link rel="stylesheet" href="../libs/jqGrid/4.3.1/css/ui.jqgrid.css" />
 
     <style>
-        .ui-provider {
-            /* --- clearfix --- */
-            /*clear: both;*/
-            /*overflow: hidden;*/
-            /*display: inline-block; *//* Necessary to trigger "hasLayout" in IE */
-            /*display: block; *//* Sets element back to block */
-
-
-            /*display: inline-block;*/
-            /*text-align: left;*/
-            float: left;
-            font-family: helvetica, sans-serif;
-            width: 6em;
-            height: 3em;
-        }
-        
-        .ui-provider .icon {
-            float: left;
-            width: 3em;
-            height: 3em;
-        }
-
-        .ui-provider div {
-        }
-        .ui-provider .name {
-            color: #0066DD;
-            font-weight: bold;
-            display: block;
-        }
-
-        .ui-provider .title {
-            font-size: 0.8em;
-            color: #535335;
-            display: block;
-        }
-
-        .column-container {
-            /* --- clearfix --- */
-            overflow: hidden;
-            display: inline-block; /* Necessary to trigger "hasLayout" in IE */
-            display: block; /* Sets element back to block */
-
-        }
-
-        .column {
-            /* --- clearfix --- */
-            position: relative;
-
-            /* -- size -- */
-            width: 46%;
-            padding: 1%;
-
-        }
-
-        .left {
-            float: left;
-        }
-
-        .right {
-            float: right;
-        }
-
-        /** --- --- */
-        /** --- images --- */
-
-        /*.ui-icon-male*/
-        /*{*/
-            /*overflow: hidden;*/
-
-            /** positioning - extracted from jquery ui button */
-            /*position: absolute;  *//* force postion */
-            /*display: block;*/
-
-            /* adjust the final postion */
-            /**/
-            /** --- following is not required */
-            /*text-indent: -99999px;*/
-            /*background-repeat: no-repeat; */
-            /*left: 90px;*/
-            /*top: 50%;*/
-            /*margin-top: 8px;*/
-        /*}*/
-
-
-        /** grid format */
-        #openTimeslots .ui-widget-content, #openTimeslotsContainer .ui-widget-content{
-            /* -- fonts */
-            color: #0066DD;
-        }
-
-        #openTimeslots tr.jqgroup {
-            background: #cccccc;
-        }
-
-        #openTimeslotsContainer .ui-jqgrid tr.ui-row-ltr.jqgroup td {
-            font-weight: bold;
-        }
-
-        #openTimeslotsContainer thead {
-            display: none;
-        }
-
     </style>
     <script>
         $(function() {
@@ -200,18 +98,18 @@
                 {name:'provider_name',label:'Practitioner',width:80, align:"left", editable: true,
                     formatter: function(cellvalue, options, rowObject) {
                         // option 1: img + span
-                        return  "<div class='ui-provider'>" +
-                                    "<img class='icon' src='images/ui-icon-male.png'/>" +
+                        return  "<div class='ui-provider' style='float: left; width: 100px;'>" +
+                                    "<img class='icon' src='images/ui-icon-male.png' style='float: left;'/>" +
                                     "<div style='right: 3em;'>" +
-                                        "<span class='name' style='display: block'>" + cellvalue + "</span>" +
-                                        "<span class='title' style='display: block'>Acpt</span>" +
+                                        "<span class='name' style='display: block;'>" + cellvalue + "</span>" +
+                                        "<span class='title' style='display: block;'>Acpt</span>" +
                                     "</div>" +
                                 "</div>" +
-                                "<div class='ui-provider'>" +
-                                    "<img class='icon' src='images/ui-icon-male.png'/>" +
+                                "<div class='ui-provider' style='float: left;'>" +
+                                    "<img class='icon' src='images/ui-icon-male.png' style='float: left;'/>" +
                                     "<div style='clear: inherit;'>" +
-                                        "<span class='name'>" + cellvalue + "</span>" +
-                                        "<span class='title'>Acpt</span>" +
+                                        "<span class='name' style='display: block;'>" + cellvalue + "</span>" +
+                                        "<span class='title' style='display: block;'>Acpt</span>" +
                                     "</div>" +
                                 "</div>";
 

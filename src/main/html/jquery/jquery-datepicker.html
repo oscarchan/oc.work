@@ -9,8 +9,12 @@
     <link rel="stylesheet" href="../libs/jqueryui/1.8/themes/redmond/jquery-ui.css">
 
     <style type="text/css">
+        #open_cal .ui-datepicker-inline.ui-datepicker.ui-widget {
+            width:230px;
+        }
+
         .ui-datepicker-multi-2 .ui-datepicker-group {
-            /*width: 48%;*/
+            width: 48%;
             padding: 5px;
         }
 
@@ -90,6 +94,8 @@
                    }
                }
            } );
+
+            $('#open_cal .ui-datepicker-inline').css('width', '');
 
 
            /** update the date picker's ui */
