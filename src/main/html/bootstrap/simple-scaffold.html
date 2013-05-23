@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scaffolding: Grid</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+     .hidden {
+	 display: none;
+      }
+
+     .center {
+	 margin-left:auto;
+	 margin-right:auto;
+	 float: none;
+      }
+
+     
+    </style>
+  </head>
+  <body>
+
+    <h1>Grid Scaffold</h1>
+
+    <div class="row">
+      <div class="span3 center"><button class="example btn primary large">Example 1 - Proper Spans</button></div>
+    </div>
+
+    <div class="container hidden">
+      <div class="row">
+	<div class="span12">span 12</div>
+      </div>
+      <div class="row">
+	<div class="span3">span 3</div>
+	<div class="span9">span 9</div>
+      </div>
+      <div class="row">
+	<div class="span4">span 4</div>
+	<div class="span8">span 8</div>
+      </div>
+      <div class="row">
+	<div class="span5">span 5</div>
+	<div class="span7">span 7</div>
+      </div>
+      <div class="row">
+	<div class="span6">span 6</div>
+	<div class="span6">span 6</div>
+      </div>
+      <div class="row">
+	<div class="span7">span 7</div>
+	<div class="span5">span 5</div>
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="span3 center"><button class="example btn primary large">Example 2 - Too big to fill</button></div>
+    </div>
+
+    <div class="container hidden">
+
+      <div class="row">
+	<div class="span4 bordered">span 3</div>
+	<div class="span8 bordered">span 10</div>
+      </div>
+      <div class="row">
+	<div class="span4 bordered">span 4</div>
+	<div class="span8 bordered">span 9</div>
+      </div>
+    </div>
+
+    <h1>Fluid Scaffold</h1>
+
+    <div class="row-fluid">
+      <div class="span3 center"><button class="example btn primary large">Example 1 - Proper Spans</button></div>
+    </div>
+
+    <div class="container-fluid hidden">
+      <div class="row-fluid">
+	<div class="span12">span 12</div>
+      </div>
+      <div class="row-fluid">
+	<div class="span3">span 3</div>
+	<div class="span9">span 9</div>
+      </div>
+      <div class="row-fluid">
+	<div class="span4">span 4</div>
+	<div class="span8">span 8</div>
+      </div>
+      <div class="row-fluid">
+	<div class="span5">span 5</div>
+	<div class="span7">span 7</div>
+      </div>
+      <div class="row-fluid">
+	<div class="span6">span 6</div>
+	<div class="span6">span 6</div>
+      </div>
+      <div class="row-fluid">
+	<div class="span7">span 7</div>
+	<div class="span5">span 5</div>
+      </div>
+
+    </div>
+
+    <div class="row-fluid">
+      <div class="span3 center"><button class="example btn primary large">Example 2 - Too big to fill</button></div>
+    </div>
+
+    <div class="container-fluid hidden">
+
+      <div class="row-fluid">
+	<div class="span4 bordered">span 3</div>
+	<div class="span8 bordered">span 10</div>
+      </div>
+      <div class="row-fluid">
+	<div class="span4 bordered">span 4</div>
+	<div class="span8 bordered">span 9</div>
+      </div>
+    </div>
+
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      Array.prototype.sample = function () {
+        return this[Math.floor(Math.random() * this.length)]
+      }
+
+      $(function() {
+        var choices = [0x00, 0x33, 0x66, 0x99, 0xCC, 0xFF]
+
+        $("div.row div, div.row-fluid div").each(function() {
+          var highlight_color = choices.sample() * 0x10000 + choices.sample() * 0x100 + choices.sample()
+	  
+	  $(this).css("background-color", '#' + highlight_color.toString(16));
+	});
+
+        $(".example.btn").on('click', function(event) {
+	  console.log(": selected=" + this + " vs " + $(this));
+      
+	  var parent = $(this).parents("div.row, div.row-fluid")
+	  parent.next().toggleClass("hidden");
+	});
+      });
+    </script>
+
+  </body>
+</html>
