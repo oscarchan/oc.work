@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Header and footer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+     .hidden {
+	 display: none;
+      }
+
+     .center {
+	 margin-left:auto;
+	 margin-right:auto;
+	 float: none;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h1>Header and Footer</h1>
+
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      Array.prototype.sample = function () {
+        return this[Math.floor(Math.random() * this.length)]
+      }
+
+      $(function() {
+        var choices = [0x00, 0x33, 0x66, 0x99, 0xCC, 0xFF]
+
+        $("div.row div, div.row-fluid div").each(function() {
+          var highlight_color = choices.sample() * 0x10000 + choices.sample() * 0x100 + choices.sample()
+	  
+	  $(this).css("background-color", '#' + highlight_color.toString(16));
+	});
+
+        $(".example.btn").on('click', function(event) {
+	  console.log(": selected=" + this + " vs " + $(this));
+      
+	  var parent = $(this).parents("div.row, div.row-fluid")
+	  parent.next().toggleClass("hidden");
+	});
+      });
+    </script>
+
+  </body>
+</html>
+
